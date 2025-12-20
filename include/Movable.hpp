@@ -6,6 +6,8 @@ protected:
     sf::Sprite sprite;
     sf::Texture texture;
 
+    sf::Vector2f size;
+
     sf::Vector2f speed_vector; // {px/s, px/s}
     float max_speed; // px/s
     float min_speed; // px/s

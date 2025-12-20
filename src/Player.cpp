@@ -3,16 +3,25 @@
 
 Player::Player(){
 
-    if (!texture.loadFromFile("../assets/agh.png")){
+    if (!texture.loadFromFile("../assets/player.png")){
         std::cerr << "Blad pliku!\n";
     }
     sprite.setTexture(texture);
 
     max_speed = 600.f; // px/s
     min_speed = 100.f; // px/s
+
+    size = sf::Vector2f(50.f, 50.f);
 }
 
 void Player::update(float delta){
+    std::cout 
+        << "Player position: " 
+        << sprite.getPosition().x 
+        << ", " 
+        << sprite.getPosition().y 
+        << "     \r";
+
     //* Y axis
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
         if (speed_vector.y > -max_speed)
