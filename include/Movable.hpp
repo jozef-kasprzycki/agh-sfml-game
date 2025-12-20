@@ -6,7 +6,9 @@ protected:
     sf::Sprite sprite;
     sf::Texture texture;
 
-    float speed;
+    sf::Vector2f speed_vector;
+    float max_speed;
+    float min_speed;
 
 public:
     Movable();

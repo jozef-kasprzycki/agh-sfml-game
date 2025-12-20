@@ -7,19 +7,30 @@ Player::Player(){
         std::cerr << "Blad pliku!\n";
     }
     sprite.setTexture(texture);
-    speed = 700;
+
+    max_speed = 700;
+    min_speed = 50;
 }
 
 void Player::update(float delta){
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-        move(0, -delta*speed);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
+        if (std::abs(speed_vector.y) < max_speed) 
+            speed_vector.y -= max_speed*delta;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)){
+        if (std::abs(speed_vector.y) < max_speed) 
+            speed_vector.y += max_speed*delta;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)){
+        if (std::abs(speed_vector.x) < max_speed) 
+            speed_vector.x -= max_speed*delta;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)){
+        if (std::abs(speed_vector.x) < max_speed) 
+            speed_vector.x += max_speed*delta;
+    }
+    
+    // Dodać spowolnienie
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-        move(0, delta*speed);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        move(-delta*speed, 0);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        move(delta*speed, 0);
+    move(speed_vector.x * delta, speed_vector.y * delta);
 }
