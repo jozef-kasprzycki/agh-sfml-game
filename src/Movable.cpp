@@ -16,16 +16,20 @@ void Movable::draw(sf::RenderWindow& window){
 
 void Movable::move(float x, float y){
     // game area is 1000x600
+    // (0,0)    (1000,0)
+    // (0,600)  (1000,600)
+
+    //sf::Vector2f to_move(0.f, 0.f);
 
     if (
-        x < 0 && sprite.getPosition().x - x >= 0 ||
-        x > 0 && sprite.getPosition().x + size.x + x <= 1000
+        x < 0.f && sprite.getPosition().x + x > 0.f ||
+        x > 0.f && sprite.getPosition().x + size.x + x < 1000.f
     )
         sprite.move(x, 0);
 
     if (
-        y < 0 && sprite.getPosition().y - y >= 0 ||
-        y > 0 && sprite.getPosition().y + size.y + y <= 600
+        y < 0.f && sprite.getPosition().y + y > 0.f ||
+        y > 0.f && sprite.getPosition().y + size.y + y < 600.f
     )
         sprite.move(0, y);
 }
