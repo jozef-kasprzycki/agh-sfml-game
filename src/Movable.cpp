@@ -26,10 +26,18 @@ void Movable::move(float x, float y){
         x > 0.f && sprite.getPosition().x + size.x + x < 1000.f
     )
         sprite.move(x, 0);
+    else {
+        if (std::abs(speed_vector.x) > min_speed)
+            speed_vector.x *= -0.8;
+    }
 
     if (
         y < 0.f && sprite.getPosition().y + y > 0.f ||
         y > 0.f && sprite.getPosition().y + size.y + y < 600.f
     )
         sprite.move(0, y);
+    else {
+        if (std::abs(speed_vector.y) > min_speed)
+            speed_vector.y *= -0.8;
+    }
 }
