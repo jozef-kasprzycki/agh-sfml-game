@@ -1,20 +1,31 @@
 #include "Movable.hpp"
 
-Movable::Movable(){}
-
-Movable::Movable(
-    sf::Vector2f position, 
-    sf::Texture& texture
-){
-    sprite.setTexture(texture);
-    sprite.setPosition(position);
+Movable::Movable()
+    : speed_vector(0.f, 0.f),
+    max_speed(0.f),
+    min_speed(0.f),
+    size(0.f, 0.f)
+{
 }
 
-void Movable::draw(sf::RenderWindow& window){
+
+//Movable::Movable(
+//    sf::Vector2f position,
+//    sf::Texture& texture
+//) {
+//    sprite.setTexture(texture);
+//    sprite.setPosition(position);
+//}
+
+void Movable::draw(sf::RenderWindow& window) {
     window.draw(sprite);
 }
 
-void Movable::move(float x, float y){
+sf::FloatRect Movable::getBounds() const {
+    return sprite.getGlobalBounds();
+}
+
+void Movable::move(float x, float y) {
     // game area is 1000x600
     // (0,0)    (1000,0)
     // (0,600)  (1000,600)
@@ -24,7 +35,7 @@ void Movable::move(float x, float y){
     if (
         x < 0.f && sprite.getPosition().x + x > 0.f ||
         x > 0.f && sprite.getPosition().x + size.x + x < 1000.f
-    )
+        )
         sprite.move(x, 0);
     else {
         if (std::abs(speed_vector.x) > min_speed)
@@ -34,7 +45,7 @@ void Movable::move(float x, float y){
     if (
         y < 0.f && sprite.getPosition().y + y > 0.f ||
         y > 0.f && sprite.getPosition().y + size.y + y < 600.f
-    )
+        )
         sprite.move(0, y);
     else {
         if (std::abs(speed_vector.y) > min_speed)

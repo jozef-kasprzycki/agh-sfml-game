@@ -4,7 +4,7 @@
 class Movable {
 protected:
     sf::Sprite sprite;
-    sf::Texture texture;
+    //sf::Texture texture;
 
     sf::Vector2f size;
 
@@ -14,12 +14,13 @@ protected:
 
 public:
     Movable();
-    Movable(
+    /*Movable(
         sf::Vector2f position,
         sf::Texture& texture
-    );
+    );*/
 
     void draw(sf::RenderWindow& window);
     void move(float x, float y);
 
+    sf::FloatRect getBounds() const;
 };

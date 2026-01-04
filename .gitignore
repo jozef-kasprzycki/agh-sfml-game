@@ -2,3 +2,7 @@
 .vs/
 build/*
 /build
+out/
+vcpkg-overlay/
+CMakeSettings.json
+vcpkg.json
