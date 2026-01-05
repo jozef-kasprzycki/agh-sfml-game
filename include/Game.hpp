@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Player.hpp"
 #include "Obstacle.hpp"
+#include "Enemy.hpp"
 #include <vector>
 
 class Game {
@@ -12,6 +13,7 @@ private:
     Player player;
 
     std::vector<Obstacle> obstacles;
+    std::vector<Enemy> enemies;
 
     void processEvents();
     void update(float delta);

@@ -5,7 +5,7 @@
 
 //funkcja zwraca losową pozycję, która nie koliduje z Playerem i zapewnia, że obiekt mieści się w oknie gry
 //tworzy tymczasowy hitbox (candidate) i sprawdza kolizję z forbidden (hitbox Playera)
-sf::Vector2f getRandomPositionNoCollision(
+sf::Vector2f getRandomPositionNoCollisionObstacle(
     const sf::FloatRect& forbidden,
     const sf::Vector2f& size
 ) {
@@ -34,6 +34,46 @@ int getRandomObstacleCount() {
     return dist(gen);
 }
 
+sf::Vector2f getRandomPositionNoCollisionMultiple(
+    const sf::FloatRect& playerBounds,
+    const std::vector<Obstacle>& obstacles,
+    const sf::Vector2f& size
+) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+
+    std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
+    std::uniform_real_distribution<float> distY(0.f, 600.f - size.y);
+
+    sf::FloatRect candidate;
+
+    bool collision;
+    do {
+        collision = false;
+
+        candidate = {
+            distX(gen),
+            distY(gen),
+            size.x,
+            size.y
+        };
+
+        if (candidate.intersects(playerBounds))
+            collision = true;
+
+        for (const auto& obstacle : obstacles) {
+            if (candidate.intersects(obstacle.getBounds())) {
+                collision = true;
+                break;
+            }
+        }
+
+    } while (collision);
+
+    return { candidate.left, candidate.top };
+}
+
+
 Game::Game()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game"),
     player()
@@ -43,13 +83,24 @@ Game::Game()
     int obstacleCount = getRandomObstacleCount();
 
     for (int i = 0; i < obstacleCount; ++i) {
-        sf::Vector2f pos = getRandomPositionNoCollision(
+        sf::Vector2f pos = getRandomPositionNoCollisionObstacle(
             player.getBounds(),
             obstacleSize
         );
 
         obstacles.emplace_back(pos, obstacleSize);
     }
+
+    const sf::Vector2f enemySize(50.f, 50.f);
+
+    sf::Vector2f enemyPos = getRandomPositionNoCollisionMultiple(
+        player.getBounds(),
+        obstacles,
+        enemySize
+    );
+
+    enemies.emplace_back(enemyPos, enemySize);
+
 }
 
 void Game::run() {
@@ -81,6 +132,29 @@ void Game::update(float delta) {
             );
         }
     }
+
+    for (auto& enemy : enemies) {
+
+		//pogoń za środkiem gracza
+        sf::FloatRect pb = player.getBounds();
+        sf::Vector2f playerCenter(
+            pb.left + pb.width / 2.f,
+            pb.top + pb.height / 2.f
+        );
+        enemy.update(delta, playerCenter);
+
+
+        //enemy.update(delta, player.getBounds().getPosition());
+
+
+        if (player.getBounds().intersects(enemy.getBounds())) {
+            CollisionManager::resolveCollision(
+                player,
+                enemy.getBounds()
+            );
+        }
+    }
+
 }
 
 void Game::render() {
@@ -89,10 +163,17 @@ void Game::render() {
     //window.clear(sf::Color::White); //sprawdza czy nie ma przezroczystości
     // Dodać renderowanie różnych elementów gry
 
-    //obstacles.reserve(3);
+    //renderowanie przeszkód
     for (auto& obstacle : obstacles) {
         obstacle.draw(window);
     }
+
+
+	//renderowanie wrogów
+    for (auto& enemy : enemies) {
+        enemy.draw(window);
+    }
+
 
     player.draw(window);
     window.display();
