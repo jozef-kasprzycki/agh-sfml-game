@@ -2,15 +2,13 @@
 
 GameObj::GameObj(
     sf::Vector2f position,
-    sf::Vector2f size,
-    sf::Texture texture
+    sf::Vector2f size
 ) {
-    sprite.setTexture(texture);
     sprite.setPosition(position);
     /*
     sprite.setScale(size.x / sprite.getLocalBounds().width, 
                     size.y / sprite.getLocalBounds().height);
-    */
+    */ // Nie wiem czy ta skala nam się w ogóle przyda
 }
 
 sf::Vector2f GameObj::getPosition() {
@@ -29,6 +27,10 @@ sf::FloatRect GameObj::getGlobalBounds() const {
 
 void GameObj::setPosition(sf::Vector2f pos) {
     sprite.setPosition(pos);
+}
+
+void GameObj::setTexture(sf::Texture &texture){
+    sprite.setTexture(texture);
 }
 
 void GameObj::setTextureRect(sf::IntRect rect) {

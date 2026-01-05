@@ -8,16 +8,16 @@ private:
 public:
     GameObj(
         sf::Vector2f position,
-        sf::Vector2f size,
-        sf::Texture texture
+        sf::Vector2f size
     );
 
     sf::Vector2f getPosition();
     sf::Vector2f getSize();
     sf::FloatRect getGlobalBounds() const;
 
-    void setPosition(sf::Vector2f);
-    void setTextureRect(sf::IntRect);
+    void setPosition(sf::Vector2f pos);
+    void setTexture(sf::Texture &texture);
+    void setTextureRect(sf::IntRect rect);
 
     void draw(sf::RenderWindow& window);
 };
