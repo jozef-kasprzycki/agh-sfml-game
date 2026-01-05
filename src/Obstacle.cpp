@@ -1,17 +1,21 @@
 #include "Obstacle.hpp"
 #include <iostream>
 
+sf::Texture Obstacle::sharedTexture; // definicja statycznej tekstury
+
 Obstacle::Obstacle()
     : size(50.f, 50.f)
 {
-    if (!texture.loadFromFile("../assets/obstacle.png")) {
-        std::cerr << "Blad ladowania obstacle.png\n";
+    if (sharedTexture.getSize().x == 0) { // ³adujemy tylko raz
+        if (!sharedTexture.loadFromFile("../assets/obstacle.png")) {
+            std::cerr << "Blad ladowania obstacle.png\n";
+        }
     }
 
-    sprite.setTexture(texture);
+    sprite.setTexture(sharedTexture);
     sprite.setPosition(0.f, 0.f);
 
-    auto texSize = texture.getSize();
+    auto texSize = sharedTexture.getSize();
     if (texSize.x > 0 && texSize.y > 0) {
         sprite.setScale(
             size.x / texSize.x,
@@ -23,14 +27,16 @@ Obstacle::Obstacle()
 Obstacle::Obstacle(sf::Vector2f position, sf::Vector2f size)
     : size(size)
 {
-    if (!texture.loadFromFile("../assets/obstacle.png")) {
-        std::cerr << "Blad ladowania obstacle.png\n";
+    if (sharedTexture.getSize().x == 0) { 
+        if (!sharedTexture.loadFromFile("../assets/obstacle.png")) {
+            std::cerr << "Blad ladowania obstacle.png\n";
+        }
     }
 
-    sprite.setTexture(texture);
+    sprite.setTexture(sharedTexture);
     sprite.setPosition(position);
 
-    auto texSize = texture.getSize();
+    auto texSize = sharedTexture.getSize();
     if (texSize.x > 0 && texSize.y > 0) {
         sprite.setScale(
             size.x / texSize.x,

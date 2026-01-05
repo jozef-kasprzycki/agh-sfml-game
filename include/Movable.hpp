@@ -23,4 +23,6 @@ public:
     void move(float x, float y);
 
     sf::FloatRect getBounds() const;
+
+	friend class CollisionManager;
 };

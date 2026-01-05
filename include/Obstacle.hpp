@@ -4,8 +4,9 @@
 class Obstacle {
 private:
     sf::Sprite sprite;
-    sf::Texture texture;
     sf::Vector2f size;
+
+    static sf::Texture sharedTexture; // WSPÓLNA TEKSTURA
 
 public:
     Obstacle();
@@ -15,9 +16,12 @@ public:
         sf::Vector2f size
     );
 
+    Obstacle(const Obstacle&) = delete;
+    Obstacle& operator=(const Obstacle&) = delete;
+
+    Obstacle(Obstacle&&) = default;
+    Obstacle& operator=(Obstacle&&) = default;
 
     void draw(sf::RenderWindow& window);
     sf::FloatRect getBounds() const;
 };
-
-
