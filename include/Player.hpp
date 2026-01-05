@@ -14,4 +14,7 @@ public:
     void update(float delta);
     sf::FloatRect getBounds() const;
     void stop();
+
+    friend class CollisionManager;
+
 };

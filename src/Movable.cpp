@@ -1,4 +1,5 @@
 #include "Movable.hpp"
+#include <cmath>
 
 Movable::Movable()
     : speed_vector(0.f, 0.f),
