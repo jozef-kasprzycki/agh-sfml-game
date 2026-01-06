@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 class GameObj {
-private:
+protected:
     sf::Sprite sprite;
 
 public:
@@ -16,6 +16,7 @@ public:
     sf::FloatRect getGlobalBounds() const;
 
     void setPosition(sf::Vector2f pos);
+    void setScale(float x, float y);
     void setTexture(sf::Texture &texture);
     void setTextureRect(sf::IntRect rect);
 

@@ -1,10 +1,11 @@
 #include "Enemy.hpp"
 #include <iostream>
+#include <cmath>
 
 sf::Texture Enemy::sharedTexture;
 
-Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) {
-    this->size = size;
+Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) : Movable(position, size) {
+    // sprite.Resize(size);
 
     if (sharedTexture.getSize().x == 0) {
         if (!sharedTexture.loadFromFile("../assets/enemy.png")) {
@@ -12,12 +13,12 @@ Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) {
         }
     }
 
-    sprite.setTexture(sharedTexture);
-    sprite.setPosition(position);
+    setTexture(sharedTexture);
+    setPosition(position);
 
     auto texSize = sharedTexture.getSize();
     if (texSize.x > 0 && texSize.y > 0) {
-        sprite.setScale(
+        setScale(
             size.x / texSize.x,
             size.y / texSize.y
         );
@@ -29,7 +30,7 @@ Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) {
 }
 
 void Enemy::update(float delta, const sf::Vector2f& playerPosition) {
-    sf::Vector2f enemyPos = sprite.getPosition();
+    sf::Vector2f enemyPos = getPosition();
 
     sf::Vector2f direction = playerPosition - enemyPos;
 
@@ -40,7 +41,7 @@ void Enemy::update(float delta, const sf::Vector2f& playerPosition) {
         direction.y /= length;
     }
 
-    float enemySpeed = 200.f; // px/s – ³atwe do tuningu
+    float enemySpeed = 200.f; // px/s ï¿½ ï¿½atwe do tuningu
 
     speed_vector = direction * enemySpeed;
 

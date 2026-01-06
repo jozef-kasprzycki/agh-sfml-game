@@ -1,4 +1,5 @@
 #include "GameObj.hpp"
+#include <SFML/Graphics.hpp> // ensure FloatRect & Transformable are available
 
 GameObj::GameObj(
     sf::Vector2f position,
@@ -39,4 +40,9 @@ void GameObj::setTextureRect(sf::IntRect rect) {
 
 void GameObj::draw(sf::RenderWindow& window) {
     window.draw(sprite);
+}
+
+void GameObj::setScale(float x, float y) {
+	// forward scale to SFML transform so rendering uses it
+	sprite.setScale(x, y);
 }

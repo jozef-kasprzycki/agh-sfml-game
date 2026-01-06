@@ -139,7 +139,7 @@ void Game::update(float delta) {
     for (auto& enemy : enemies) {
 
 		//pogoń za środkiem gracza
-        sf::FloatRect pb = player.getBounds();
+        sf::FloatRect pb = player.getGlobalBounds();
         sf::Vector2f playerCenter(
             pb.left + pb.width / 2.f,
             pb.top + pb.height / 2.f
@@ -150,10 +150,10 @@ void Game::update(float delta) {
         //enemy.update(delta, player.getBounds().getPosition());
 
 
-        if (player.getBounds().intersects(enemy.getBounds())) {
+        if (player.getGlobalBounds().intersects(enemy.getGlobalBounds())) {
             CollisionManager::resolveCollision(
                 player,
-                enemy.getBounds()
+                enemy.getGlobalBounds()
             );
         }
     }
