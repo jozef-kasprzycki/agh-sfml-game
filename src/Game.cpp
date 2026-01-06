@@ -62,7 +62,7 @@ sf::Vector2f getRandomPositionNoCollisionMultiple(
             collision = true;
 
         for (const auto& obstacle : obstacles) {
-            if (candidate.intersects(obstacle.getBounds())) {
+            if (candidate.intersects(obstacle.getGlobalBounds())) {
                 collision = true;
                 break;
             }
@@ -124,10 +124,10 @@ void Game::update(float delta) {
     player.update(delta);
 
     for (const auto& obstacle : obstacles) {
-        if (player.getGlobalBounds().intersects(obstacle.getBounds())) {
+        if (player.getGlobalBounds().intersects(obstacle.getGlobalBounds())) {
             CollisionManager::resolveCollision(
                 player,
-                obstacle.getBounds()
+                obstacle.getGlobalBounds()
             );
         }
     }
