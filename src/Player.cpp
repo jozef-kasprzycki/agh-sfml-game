@@ -1,34 +1,23 @@
 #include "Player.hpp"
 #include <iostream>
 
-Player::Player() {
-
-    if (!texture.loadFromFile("../assets/player.png")) {
-        std::cerr << "Blad pliku!\n";
-    }
-
-    sprite.setTexture(texture);
-    sprite.setPosition(100.f, 100.f);
-
-    size = sf::Vector2f(50.f, 50.f);
-
-    auto texSize = texture.getSize();
-    sprite.setScale(
-        size.x / texSize.x,
-        size.y / texSize.y
-    );
-
+Player::Player(
+    sf::Vector2f position,
+    sf::Vector2f size
+)
+    : Movable(position, size),
+      hp(100)
+{
     max_speed = 600.f;
     min_speed = 100.f;
 }
 
-
 void Player::update(float delta) {
     std::cout
         << "Player position: "
-        << sprite.getPosition().x
+        << getPosition().x
         << ", "
-        << sprite.getPosition().y
+        << getPosition().y
         << "     \r";
 
     //* Y axis
@@ -86,12 +75,4 @@ void Player::update(float delta) {
     }
 
     move(speed_vector.x * delta, speed_vector.y * delta);
-}
-
-sf::FloatRect Player::getBounds() const {
-    return sprite.getGlobalBounds();
-}
-
-void Player::stop() {
-    speed_vector = { 0.f, 0.f };
 }

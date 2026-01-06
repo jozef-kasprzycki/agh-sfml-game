@@ -1,20 +1,22 @@
 #pragma once
+#include "Movable.hpp"
 #include <SFML/Graphics.hpp>
 
-#include "Movable.hpp"
-
 class Player : public Movable {
-
 private:
-	sf::Texture texture;
+	int hp;
+    // ...wartości charakterysytyczne
+    // tylko dla postaci gracza...
 
 public:
-    Player();
+    Player(
+        sf::Vector2f position,
+        sf::Vector2f size
+    );
 
     void update(float delta);
     sf::FloatRect getBounds() const;
-    void stop();
 
+    // ?
     friend class CollisionManager;
-
 };

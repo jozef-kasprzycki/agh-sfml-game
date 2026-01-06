@@ -6,7 +6,7 @@ void CollisionManager::resolveCollision(
     Movable& movable,
     const sf::FloatRect& obstacleBounds
 ) {
-    sf::FloatRect m = movable.getBounds();
+    sf::FloatRect m = movable.getGlobalBounds();
 
     float overlapLeft = (m.left + m.width) - obstacleBounds.left;
     float overlapRight = (obstacleBounds.left + obstacleBounds.width) - m.left;
