@@ -2,8 +2,12 @@
 #include <SFML/Graphics.hpp>
 
 class GameObj {
-protected:
+private:
     sf::Sprite sprite;
+
+protected:
+    void setTexture(sf::Texture &texture);
+    void setScale(const sf::Vector2f& targetSize);
 
 public:
     GameObj(
@@ -16,8 +20,6 @@ public:
     sf::FloatRect getGlobalBounds() const;
 
     void setPosition(sf::Vector2f pos);
-    void setScale(float x, float y);
-    void setTexture(sf::Texture &texture);
     void setTextureRect(sf::IntRect rect);
 
     void draw(sf::RenderWindow& window);

@@ -6,10 +6,10 @@ GameObj::GameObj(
     sf::Vector2f size
 ) {
     sprite.setPosition(position);
-    /*
+    
     sprite.setScale(size.x / sprite.getLocalBounds().width, 
                     size.y / sprite.getLocalBounds().height);
-    */ // Nie wiem czy ta skala nam się w ogóle przyda
+    // Nie wiem czy ta skala nam się w ogóle przyda
 }
 
 sf::Vector2f GameObj::getPosition() {
@@ -42,7 +42,7 @@ void GameObj::draw(sf::RenderWindow& window) {
     window.draw(sprite);
 }
 
-void GameObj::setScale(float x, float y) {
+void GameObj::setScale(const sf::Vector2f& targetSize) {
 	// forward scale to SFML transform so rendering uses it
-	sprite.setScale(x, y);
+	sprite.setScale(targetSize);
 }
