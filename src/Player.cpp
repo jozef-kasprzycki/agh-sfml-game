@@ -1,15 +1,16 @@
 #include "Player.hpp"
 #include <iostream>
+#include <SFML/Graphics.hpp>
 
-Player::Player(
-    sf::Vector2f position,
-    sf::Vector2f size
-)
-    : Movable(position, size),
-      hp(100)
+Player::Player(sf::Vector2f position, sf::Vector2f size) 
+    : Movable(position, size)
 {
     max_speed = 600.f;
     min_speed = 100.f;
+    hp = 100;
+
+    if (!texture.loadFromFile("../assets/player.png")) { EXIT_FAILURE; }
+    setTexture(texture);
 }
 
 void Player::update(float delta) {

@@ -4,6 +4,7 @@
 class GameObj {
 private:
     sf::Sprite sprite;
+    sf::Vector2f targetSize;
 
 protected:
     void setTexture(sf::Texture &texture);

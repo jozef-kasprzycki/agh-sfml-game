@@ -100,10 +100,6 @@ Game::Game()
     );
 
     enemies.emplace_back(enemyPos, enemySize);
-
-    sf::Texture playerTexture;
-    playerTexture.loadFromFile("../assets/player.png");
-    player.setTexture(playerTexture);
 }
 
 void Game::run() {

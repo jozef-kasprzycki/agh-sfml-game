@@ -19,8 +19,10 @@ Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) : Movable(position, size)
     auto texSize = sharedTexture.getSize();
     if (texSize.x > 0 && texSize.y > 0) {
         setScale(
-            size.x / texSize.x,
-            size.y / texSize.y
+            sf::Vector2f(
+                size.x / texSize.x,
+                size.y / texSize.y
+            )
         );
     }
 

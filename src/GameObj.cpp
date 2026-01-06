@@ -1,15 +1,10 @@
 #include "GameObj.hpp"
 #include <SFML/Graphics.hpp> // ensure FloatRect & Transformable are available
 
-GameObj::GameObj(
-    sf::Vector2f position,
-    sf::Vector2f size
-) {
+GameObj::GameObj(sf::Vector2f position, sf::Vector2f size) 
+    : targetSize(size) 
+{
     sprite.setPosition(position);
-    
-    sprite.setScale(size.x / sprite.getLocalBounds().width, 
-                    size.y / sprite.getLocalBounds().height);
-    // Nie wiem czy ta skala nam się w ogóle przyda
 }
 
 sf::Vector2f GameObj::getPosition() {
@@ -32,6 +27,10 @@ void GameObj::setPosition(sf::Vector2f pos) {
 
 void GameObj::setTexture(sf::Texture &texture){
     sprite.setTexture(texture);
+    auto b = sprite.getLocalBounds();
+    if (b.width > 0 && b.height > 0) {
+        sprite.setScale(targetSize.x / b.width, targetSize.y / b.height);
+    }
 }
 
 void GameObj::setTextureRect(sf::IntRect rect) {

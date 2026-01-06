@@ -4,6 +4,7 @@
 
 class Player : public Movable {
 private:
+    sf::Texture texture;
 	int hp;
     // ...wartości charakterysytyczne
     // tylko dla postaci gracza...
@@ -15,7 +16,6 @@ public:
     );
 
     void update(float delta);
-    sf::FloatRect getBounds() const;
 
     // ?
     friend class CollisionManager;
