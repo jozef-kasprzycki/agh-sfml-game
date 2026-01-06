@@ -1,28 +1,22 @@
 #pragma once
+#include "GameObj.hpp"
 #include <SFML/Graphics.hpp>
 
-class Movable {
+class Movable : public GameObj {
 protected:
-    sf::Sprite sprite;
-    //sf::Texture texture;
-
-    sf::Vector2f size;
-
     sf::Vector2f speed_vector; // {px/s, px/s}
     float max_speed; // px/s
     float min_speed; // px/s
 
 public:
-    Movable();
-    /*Movable(
+    Movable(
         sf::Vector2f position,
-        sf::Texture& texture
-    );*/
+        sf::Vector2f size
+    );
 
-    void draw(sf::RenderWindow& window);
     void move(float x, float y);
+    void stop();
 
-    sf::FloatRect getBounds() const;
-
+    // ?
 	friend class CollisionManager;
 };

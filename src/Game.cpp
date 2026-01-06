@@ -76,7 +76,7 @@ sf::Vector2f getRandomPositionNoCollisionMultiple(
 
 Game::Game()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game"),
-    player()
+    player(sf::Vector2f(10.f, 10.f), sf::Vector2f(50, 50))
 {
     const sf::Vector2f obstacleSize(50.f, 50.f);
 
@@ -84,7 +84,7 @@ Game::Game()
 
     for (int i = 0; i < obstacleCount; ++i) {
         sf::Vector2f pos = getRandomPositionNoCollisionObstacle(
-            player.getBounds(),
+            player.getGlobalBounds(),
             obstacleSize
         );
 
@@ -94,13 +94,16 @@ Game::Game()
     const sf::Vector2f enemySize(50.f, 50.f);
 
     sf::Vector2f enemyPos = getRandomPositionNoCollisionMultiple(
-        player.getBounds(),
+        player.getGlobalBounds(),
         obstacles,
         enemySize
     );
 
     enemies.emplace_back(enemyPos, enemySize);
 
+    sf::Texture playerTexture;
+    playerTexture.loadFromFile("../assets/player.png");
+    player.setTexture(playerTexture);
 }
 
 void Game::run() {
@@ -125,7 +128,7 @@ void Game::update(float delta) {
     player.update(delta);
 
     for (const auto& obstacle : obstacles) {
-        if (player.getBounds().intersects(obstacle.getBounds())) {
+        if (player.getGlobalBounds().intersects(obstacle.getBounds())) {
             CollisionManager::resolveCollision(
                 player,
                 obstacle.getBounds()
