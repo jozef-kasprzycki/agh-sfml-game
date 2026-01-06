@@ -5,30 +5,12 @@
 sf::Texture Enemy::sharedTexture;
 
 Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) : Movable(position, size) {
-    // sprite.Resize(size);
 
-    if (sharedTexture.getSize().x == 0) {
-        if (!sharedTexture.loadFromFile("../assets/enemy.png")) {
-            std::cerr << "Blad ladowania enemy.png\n";
-        }
+    if (!sharedTexture.loadFromFile("../assets/enemy.png")) {
+        std::cerr << "Blad ladowania enemy.png\n";
     }
 
     setTexture(sharedTexture);
-    setPosition(position);
-
-    auto texSize = sharedTexture.getSize();
-    if (texSize.x > 0 && texSize.y > 0) {
-        setScale(
-            sf::Vector2f(
-                size.x / texSize.x,
-                size.y / texSize.y
-            )
-        );
-    }
-
-    speed_vector = { 0.f, 0.f };
-    max_speed = 0.f;
-    min_speed = 0.f;
 }
 
 void Enemy::update(float delta, const sf::Vector2f& playerPosition) {
