@@ -1,16 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-
-class Obstacle {
+#include "GameObj.hpp"
+class Obstacle : public GameObj {
 private:
-    sf::Sprite sprite;
-    sf::Vector2f size;
-
-    static sf::Texture sharedTexture; // WSPÓLNA TEKSTURA
+    static sf::Texture sharedTexture; // WSPï¿½LNA TEKSTURA
 
 public:
-    Obstacle();
-
     Obstacle(
         sf::Vector2f position,
         sf::Vector2f size
@@ -21,7 +16,4 @@ public:
 
     Obstacle(Obstacle&&) = default;
     Obstacle& operator=(Obstacle&&) = default;
-
-    void draw(sf::RenderWindow& window);
-    sf::FloatRect getBounds() const;
 };
