@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "CollisionManager.hpp"
 #include "Player.hpp"
 #include "Obstacle.hpp"
 #include "Enemy.hpp"
@@ -10,6 +11,7 @@ private:
     sf::RenderWindow window;
     sf::Clock clock;
 
+    CollisionManager collisionManager;
     Player player;
 
     std::vector<Obstacle> obstacles;

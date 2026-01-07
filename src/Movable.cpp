@@ -11,8 +11,21 @@ Movable::Movable(
       min_speed(0.f)
 {}
 
-void Movable::move(float x, float y) {
+sf::Vector2f Movable::getSpeedVector(){
+    return speed_vector;
+}
 
+void Movable::bounceX(){
+    speed_vector.x *= -0.5;
+}
+
+void Movable::bounceY(){
+    speed_vector.y *= -0.5;
+}
+
+void Movable::move(sf::Vector2f delta) {
+    setPosition(sf::Vector2f(getPosition().x + delta.x, getPosition().y + delta.y));
+    /*
     if (
         x < 0.f && getPosition().x + x > 0.f ||
         x > 0.f && getPosition().x + getSize().x + x < 1000.f
@@ -32,6 +45,7 @@ void Movable::move(float x, float y) {
         if (std::abs(speed_vector.y) > min_speed)
             speed_vector.y *= -0.8;
     }
+    */
 }
 
 void Movable::stop() {

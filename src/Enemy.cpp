@@ -29,5 +29,5 @@ void Enemy::update(float delta, const sf::Vector2f& playerPosition) {
 
     speed_vector = direction * enemySpeed;
 
-    move(speed_vector.x * delta, speed_vector.y * delta);
+    move(sf::Vector2f(speed_vector.x * delta, speed_vector.y * delta));
 }

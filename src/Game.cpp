@@ -100,6 +100,8 @@ Game::Game()
     );
 
     enemies.emplace_back(enemyPos, enemySize);
+
+    collisionManager.addObstacle(obstacles.back().getGlobalBounds());
 }
 
 void Game::run() {
@@ -122,7 +124,11 @@ void Game::processEvents() {
 void Game::update(float delta) {
     // Aktualizacja klas przyjmujących czas jako paramter
     player.update(delta);
+    sf::Vector2f pd = player.getSpeedVector() * delta;
+    collisionManager.tryMove(player, pd);
 
+
+    /*
     for (const auto& obstacle : obstacles) {
         if (player.getGlobalBounds().intersects(obstacle.getGlobalBounds())) {
             CollisionManager::resolveCollision(
@@ -153,6 +159,7 @@ void Game::update(float delta) {
             );
         }
     }
+    */
 
 }
 

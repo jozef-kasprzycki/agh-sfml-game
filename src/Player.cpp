@@ -14,12 +14,12 @@ Player::Player(sf::Vector2f position, sf::Vector2f size)
 }
 
 void Player::update(float delta) {
-    std::cout
-        << "Player position: "
-        << getPosition().x
-        << ", "
-        << getPosition().y
-        << "     \r";
+    // std::cout
+    //     << "Player position: "
+    //     << getPosition().x
+    //     << ", "
+    //     << getPosition().y
+    //     << "     \r";
 
     //* Y axis
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
@@ -75,5 +75,5 @@ void Player::update(float delta) {
         speed_vector.x = 0.f;
     }
 
-    move(speed_vector.x * delta, speed_vector.y * delta);
+    //move(sf::Vector2f(speed_vector.x * delta, speed_vector.y * delta));
 }

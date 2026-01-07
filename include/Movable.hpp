@@ -14,9 +14,13 @@ public:
         sf::Vector2f size
     );
 
-    void move(float x, float y);
+    sf::Vector2f getSpeedVector();
+
+    void bounceX();
+    void bounceY();
+    void move(sf::Vector2f);
     void stop();
 
     // ?
-	friend class CollisionManager;
+	//friend class CollisionManager;
 };
