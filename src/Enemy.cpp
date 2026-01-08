@@ -25,9 +25,14 @@ void Enemy::update(float delta, const sf::Vector2f& playerPosition) {
         direction.y /= length;
     }
 
-    float enemySpeed = 200.f; // px/s � �atwe do tuningu
+    float enemySpeed = 400.f; // px/s � �atwe do tuningu
 
-    speed_vector = direction * enemySpeed;
+    if (length <= 500)
+        speed_vector = direction * enemySpeed;
+    else{
+        speed_vector.x *= 0.2;
+        speed_vector.y *= 0.2;
+    }
 
-    move(sf::Vector2f(speed_vector.x * delta, speed_vector.y * delta));
+    //move(sf::Vector2f(speed_vector.x * delta, speed_vector.y * delta));
 }
