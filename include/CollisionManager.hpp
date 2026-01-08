@@ -9,6 +9,9 @@ private:
     std::vector<sf::FloatRect> obstacles;
 
 public:
+    CollisionManager();
+    CollisionManager(std::vector<sf::FloatRect> obstacles);
+
     void addObstacle(const sf::FloatRect& rect);
 
     void tryMove(

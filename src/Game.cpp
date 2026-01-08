@@ -76,10 +76,11 @@ sf::Vector2f getRandomPositionNoCollisionMultiple(
 
 Game::Game()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game"),
-    player(sf::Vector2f(10.f, 10.f), sf::Vector2f(50, 50))
+    player(sf::Vector2f(10.f, 10.f), sf::Vector2f(50, 50)),
+    collisionManager()
 {
     const sf::Vector2f obstacleSize(50.f, 50.f);
-
+    
     int obstacleCount = getRandomObstacleCount();
 
     for (int i = 0; i < obstacleCount; ++i) {
@@ -89,6 +90,7 @@ Game::Game()
         );
 
         obstacles.emplace_back(pos, obstacleSize);
+        collisionManager.addObstacle(obstacles.back().getGlobalBounds());
     }
 
     const sf::Vector2f enemySize(50.f, 50.f);
@@ -101,7 +103,7 @@ Game::Game()
 
     enemies.emplace_back(enemyPos, enemySize);
 
-    collisionManager.addObstacle(obstacles.back().getGlobalBounds());
+    
 }
 
 void Game::run() {
@@ -137,6 +139,7 @@ void Game::update(float delta) {
             );
         }
     }
+        */
 
     for (auto& enemy : enemies) {
 
@@ -147,19 +150,12 @@ void Game::update(float delta) {
             pb.top + pb.height / 2.f
         );
         enemy.update(delta, playerCenter);
+        sf::Vector2f ed = enemy.getSpeedVector() * delta;
+        collisionManager.tryMove(enemy, ed);
 
 
         //enemy.update(delta, player.getBounds().getPosition());
-
-
-        if (player.getGlobalBounds().intersects(enemy.getGlobalBounds())) {
-            CollisionManager::resolveCollision(
-                player,
-                enemy.getGlobalBounds()
-            );
-        }
     }
-    */
 
 }
 

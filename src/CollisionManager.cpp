@@ -5,6 +5,9 @@
 #include <algorithm>
 #include <iostream>
 
+CollisionManager::CollisionManager(){std::cout << "collisionManager constructed.\n";}
+CollisionManager::CollisionManager(std::vector<sf::FloatRect> obstacles) : obstacles(obstacles) {}
+
 void CollisionManager::addObstacle(const sf::FloatRect& rect) {
     obstacles.push_back(rect);
 }
@@ -30,17 +33,35 @@ void CollisionManager::tryMove(
 
     // Sprawdzanie przeszkód 
 
-    for (auto& obs : obstacles) {
-        if (to_move.intersects(obs)){
-            if (to_move.top < obs.top + obs.height || to_move.top + to_move.height > obs.top){
-                movable.bounceY();
-                posDelta.y = 0;
-                std::cout << "Zderzenie Y z przeszkoda\n";
+    for (const auto& obs : obstacles) {
+        if (!to_move.intersects(obs)) continue;
+
+        // nakładanie w każdej osi (liczone od to_move)
+        float overlapLeft   = (to_move.left + to_move.width) - obs.left;
+        float overlapRight  = (obs.left + obs.width) - to_move.left;
+        float overlapTop    = (to_move.top + to_move.height) - obs.top;
+        float overlapBottom = (obs.top + obs.height) - to_move.top;
+
+        float overlapX = std::min(overlapLeft, overlapRight);
+        float overlapY = std::min(overlapTop, overlapBottom);
+        const float EPS = 1e-4f;
+
+        if (overlapX + EPS < overlapY) {
+            // kolizja w osi X -> odbicie tylko X
+            movable.bounceX();
+            // ustaw korekcję ruchu w osi X tak, by nie przenikać przeszkody
+            if (posDelta.x > 0.f) {
+                posDelta.x = obs.left - (movable.getGlobalBounds().left + movable.getGlobalBounds().width);
+            } else {
+                posDelta.x = (obs.left + obs.width) - movable.getGlobalBounds().left;
             }
-            if (to_move.left < obs.left + obs.width || to_move.left + to_move.width > obs.left){
-                movable.bounceX();
-                posDelta.x = 0;
-                std::cout << "Zderzenie X z przeszkoda\n";
+        } else {
+            // kolizja w osi Y -> odbicie tylko Y
+            movable.bounceY();
+            if (posDelta.y > 0.f) {
+                posDelta.y = obs.top - (movable.getGlobalBounds().top + movable.getGlobalBounds().height);
+            } else {
+                posDelta.y = (obs.top + obs.height) - movable.getGlobalBounds().top;
             }
         }
     }
