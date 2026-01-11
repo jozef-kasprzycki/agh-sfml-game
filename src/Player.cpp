@@ -13,6 +13,11 @@ Player::Player(sf::Vector2f position, sf::Vector2f size)
     setTexture(texture);
 }
 
+void Player::getHitted(){
+    hp--;
+    std::cout << "\nPlayer hitted, hp=" << hp;
+}
+
 void Player::update(float delta) {
     // std::cout
     //     << "Player position: "
