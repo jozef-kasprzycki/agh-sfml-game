@@ -5,10 +5,7 @@
 
 class Enemy : public Movable {
 private:
-    sf::Texture sharedTexture;
-    
-    sf::Vector2f directionVector;
-    float lengthToPlayer;
+    //static sf::Texture sharedTexture;
 
 public:
     Enemy(

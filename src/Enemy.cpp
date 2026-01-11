@@ -1,17 +1,18 @@
 #include "Enemy.hpp"
-#include "Player.hpp"
+#include "TextureManager.hpp"
 #include <iostream>
 #include <cmath>
 
+//sf::Texture Enemy::sharedTexture;
 
-Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) : Movable(position, size){
-    
+Enemy::Enemy(sf::Vector2f position, sf::Vector2f size)
+    : Movable(position, size)
+{
+    setTexture(TextureManager::get("../assets/enemy.png")); 
+}
 
-    if (!sharedTexture.loadFromFile("../assets/enemy.png")) {
-        std::cerr << "Blad ladowania enemy.png\n";
-    }
-
-    setTexture(sharedTexture);
+void Enemy::update(float delta, const sf::Vector2f& playerPosition) {
+    sf::Vector2f enemyPos = getPosition();
 
     max_speed = 300;
     min_speed = 10;

@@ -4,7 +4,7 @@
 
 class Player : public Movable {
 private:
-    sf::Texture texture;
+    //sf::Texture texture;
 	int hp;
     // ...wartości charakterysytyczne
     // tylko dla postaci gracza...
