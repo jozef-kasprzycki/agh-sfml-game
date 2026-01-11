@@ -25,7 +25,7 @@ void Enemy::update(float delta, const sf::Vector2f& playerPosition) {
         direction.y /= length;
     }
 
-    float enemySpeed = 400.f; // px/s � �atwe do tuningu
+    float enemySpeed = 100.f; // px/s � �atwe do tuningu
 
     if (length <= 500)
         speed_vector = direction * enemySpeed;

@@ -6,3 +6,4 @@ out/
 vcpkg-overlay/
 CMakeSettings.json
 vcpkg.json
+sprawozdanie/*

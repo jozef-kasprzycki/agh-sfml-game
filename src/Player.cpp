@@ -5,8 +5,8 @@
 Player::Player(sf::Vector2f position, sf::Vector2f size) 
     : Movable(position, size)
 {
-    max_speed = 600.f;
-    min_speed = 100.f;
+    max_speed = 300.f;
+    min_speed = 50.f;
     hp = 100;
 
     if (!texture.loadFromFile("../assets/player.png")) { EXIT_FAILURE; }
@@ -22,13 +22,13 @@ void Player::update(float delta) {
     //     << "     \r";
 
     //* Y axis
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ) {
         if (speed_vector.y > -max_speed)
             speed_vector.y -= max_speed * delta;
 
         // TODO: animacja poruszania się w górę
     }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ) {
         if (speed_vector.y < max_speed)
             speed_vector.y += max_speed * delta;
 
@@ -49,13 +49,13 @@ void Player::update(float delta) {
     }
 
     //* X axis
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ) {
         if (speed_vector.x > -max_speed)
             speed_vector.x -= max_speed * delta;
 
         // TODO: animacja poruszania się lewo
     }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ) {
         if (speed_vector.x < max_speed)
             speed_vector.x += max_speed * delta;
 
