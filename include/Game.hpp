@@ -1,21 +1,19 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "CollisionManager.hpp"
-#include "Player.hpp"
-#include "Obstacle.hpp"
-#include "Enemy.hpp"
 #include <vector>
+
+#include "PlayerBase.hpp"
+#include "EnemyChaser.hpp"
+#include "Obstacle.hpp"
 
 class Game {
 private:
     sf::RenderWindow window;
     sf::Clock clock;
 
-    CollisionManager collisionManager;
-    Player player;
-
+    PlayerBase player;
+    std::vector<EnemyChaser> enemies;
     std::vector<Obstacle> obstacles;
-    std::vector<Enemy> enemies;
 
     void processEvents();
     void update(float delta);
