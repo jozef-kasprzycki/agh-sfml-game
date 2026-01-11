@@ -1,10 +1,11 @@
 #include "Game.hpp"
 #include "CollisionManager.hpp"
+//#include <iostream>
 #include <random>
 
 //funkcja zwraca losową pozycję, która nie koliduje z Playerem i zapewnia, że obiekt mieści się w oknie gry
 //tworzy tymczasowy hitbox (candidate) i sprawdza kolizję z forbidden (hitbox Playera)
-sf::Vector2f getRandomPositionNoCollision(
+sf::Vector2f getRandomPositionNoCollisionObstacle(
     const sf::FloatRect& forbidden,
     const sf::Vector2f& size
 ) {
@@ -26,19 +27,86 @@ sf::Vector2f getRandomPositionNoCollision(
     return { candidate.left, candidate.top };
 }
 
+int getRandomObstacleCount() {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(1, 5);
+    return dist(gen);
+}
+
+sf::Vector2f getRandomPositionNoCollisionMultiple(
+    const sf::FloatRect& playerBounds,
+    const std::vector<Obstacle>& obstacles,
+    const sf::Vector2f& size
+) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+
+    std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
+    std::uniform_real_distribution<float> distY(0.f, 600.f - size.y);
+
+    sf::FloatRect candidate;
+
+    bool collision;
+    do {
+        collision = false;
+
+        candidate = {
+            distX(gen),
+            distY(gen),
+            size.x,
+            size.y
+        };
+
+        if (candidate.intersects(playerBounds))
+            collision = true;
+
+        for (const auto& obstacle : obstacles) {
+            if (candidate.intersects(obstacle.getGlobalBounds())) {
+                collision = true;
+                break;
+            }
+        }
+
+    } while (collision);
+
+    return { candidate.left, candidate.top };
+}
+
+
 Game::Game()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game"),
-    player({ 200.f, 200.f }, { 50.f, 50.f }, 100)
+    collisionManager()
 {
+    player = std::make_unique<PlayerBasic>(
+        sf::Vector2f(10.f, 10.f),
+        sf::Vector2f(50.f, 50.f),
+        100
+    );
+
     const sf::Vector2f obstacleSize(50.f, 50.f);
 
-    obstacles.emplace_back(sf::Vector2f(400, 300), obstacleSize);
-    collisionManager.addObstacle(obstacles.back().getGlobalBounds());
+    int obstacleCount = 8 //getRandomObstacleCount();
 
-    enemies.emplace_back(
-        getRandomPositionNoCollision(player.getGlobalBounds(), { 50.f, 50.f }),
-        sf::Vector2f(50.f, 50.f)
+    for (int i = 0; i < obstacleCount; ++i) {
+        sf::Vector2f pos = getRandomPositionNoCollisionObstacle(
+            player->getGlobalBounds(),
+            obstacleSize
+        );
+
+        obstacles.emplace_back(pos, obstacleSize);
+        collisionManager.addObstacle(obstacles.back().getGlobalBounds());
+    }
+
+    const sf::Vector2f enemySize(50.f, 50.f);
+
+    sf::Vector2f enemyPos = getRandomPositionNoCollisionMultiple(
+        player->getGlobalBounds(),
+        obstacles,
+        enemySize
     );
+
+    enemies.emplace_back(enemyPos, enemySize);
 }
 
 void Game::run() {
@@ -59,32 +127,52 @@ void Game::processEvents() {
 }
 
 void Game::update(float delta) {
-    player.update(delta);
+    // Aktualizacja klas przyjmujących czas jako paramter
+    player->update(delta);
+    sf::Vector2f pd = player->getSpeedVector() * delta;
+    collisionManager.tryMove(*player, pd);
 
-    sf::Vector2f playerDelta = player.getSpeedVector() * delta;
-    collisionManager.tryMove(player, playerDelta);
+
+    /*
+    for (const auto& obstacle : obstacles) {
+        if (player.getGlobalBounds().intersects(obstacle.getGlobalBounds())) {
+            CollisionManager::resolveCollision(
+                player,
+                obstacle.getGlobalBounds()
+            );
+        }
+    }
+        */
 
     for (auto& enemy : enemies) {
-        enemy.behave(delta, player.getPosition());
 
-        sf::Vector2f enemyDelta = enemy.getSpeedVector() * delta; 
-        collisionManager.tryMove(enemy, enemyDelta);              
+        //pogoń za środkiem gracza
+        //sf::FloatRect pb = player->getGlobalBounds();
 
-        if (player.getGlobalBounds().intersects(enemy.getGlobalBounds())) {
-            player.takeDamage(1); // ❌ resolveCollision USUNIĘTE
-        }
+        enemy.behave(delta, player->getPosition());
+        sf::Vector2f ed = enemy.getSpeedVector() * delta;
+        collisionManager.tryMove(enemy, ed);
+
+        //enemy.update(delta, player.getBounds().getPosition());
     }
 }
 
 void Game::render() {
     window.clear();
+    //window.clear(sf::Color(30, 30, 30)); //sprawdza widoczność player i obstacle
+    //window.clear(sf::Color::White); //sprawdza czy nie ma przezroczystości
+    // Dodać renderowanie różnych elementów gry
 
-    for (auto& obstacle : obstacles)
+    //renderowanie przeszkód
+    for (auto& obstacle : obstacles) {
         obstacle.draw(window);
+    }
 
-    for (auto& enemy : enemies)
+    //renderowanie wrogów
+    for (auto& enemy : enemies) {
         enemy.draw(window);
+    }
 
-    player.draw(window);
+    player->draw(window);
     window.display();
 }

@@ -1,22 +1,24 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <vector>
-
-#include "PlayerBase.hpp"
-#include "EnemyChaser.hpp"
-#include "Obstacle.hpp"
 #include "CollisionManager.hpp"
+#include "PlayerBase.hpp"
+#include "PlayerBasic.hpp"
+#include "Obstacle.hpp"
+#include "EnemyBase.hpp"
+#include "EnemyChaser.hpp"
+#include <vector>
+#include <memory>
 
 class Game {
 private:
     sf::RenderWindow window;
     sf::Clock clock;
 
-    PlayerBase player;
-    std::vector<EnemyChaser> enemies;
-    std::vector<Obstacle> obstacles;
-
     CollisionManager collisionManager;
+    std::unique_ptr<PlayerBase> player;
+
+    std::vector<Obstacle> obstacles;
+    std::vector<EnemyChaser> enemies;
 
     void processEvents();
     void update(float delta);
