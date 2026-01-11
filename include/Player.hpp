@@ -16,6 +16,7 @@ public:
     );
 
     void update(float delta);
+    void getHitted();
 
     // ?
     friend class CollisionManager;
