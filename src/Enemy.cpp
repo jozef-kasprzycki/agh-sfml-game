@@ -1,38 +1,49 @@
 #include "Enemy.hpp"
+#include "Player.hpp"
 #include <iostream>
 #include <cmath>
 
-sf::Texture Enemy::sharedTexture;
 
-Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) : Movable(position, size) {
+Enemy::Enemy(sf::Vector2f position, sf::Vector2f size) : Movable(position, size){
+    
 
     if (!sharedTexture.loadFromFile("../assets/enemy.png")) {
         std::cerr << "Blad ladowania enemy.png\n";
     }
 
     setTexture(sharedTexture);
+
+    max_speed = 300;
+    min_speed = 10;
 }
 
-void Enemy::update(float delta, const sf::Vector2f& playerPosition) {
-    sf::Vector2f enemyPos = getPosition();
+void Enemy::update(float delta, Player& player) {
+    directionVector = player.getPosition() - getPosition();
+    lengthToPlayer = std::sqrt(
+        std::pow(directionVector.x, 2) +
+        std::pow(directionVector.y, 2)
+    );
 
-    sf::Vector2f direction = playerPosition - enemyPos;
-
-    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-    if (length != 0.f) {
-        direction.x /= length;
-        direction.y /= length;
+    // If we're very close to the player, stop to avoid jitter
+    if (lengthToPlayer > 500) {
+        speed_vector = sf::Vector2f(0.f, 0.f);
+        return;
     }
 
-    float enemySpeed = 400.f; // px/s � �atwe do tuningu
-
-    if (length <= 500)
-        speed_vector = direction * enemySpeed;
-    else{
-        speed_vector.x *= 0.2;
-        speed_vector.y *= 0.2;
+    if (player.getGlobalBounds().intersects(getGlobalBounds())){
+        // Zetknięcie player'a i enemy
+        player.getHitted();
     }
 
-    //move(sf::Vector2f(speed_vector.x * delta, speed_vector.y * delta));
+    // Unit direction toward player
+    sf::Vector2f dir = directionVector / lengthToPlayer;
+
+    // Apply acceleration to the speed vector (only change speed_vector, do not move here)
+    speed_vector += dir * (600 * delta);
+
+    // Clamp speed magnitude to max_speed
+    float speed = std::sqrt(speed_vector.x * speed_vector.x + speed_vector.y * speed_vector.y);
+    if (speed > max_speed) {
+        speed_vector = speed_vector * (max_speed / speed);
+    }
 }

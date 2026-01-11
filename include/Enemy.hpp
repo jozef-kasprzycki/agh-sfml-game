@@ -1,10 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Movable.hpp"
+#include "Player.hpp"
 
 class Enemy : public Movable {
 private:
-    static sf::Texture sharedTexture;
+    sf::Texture sharedTexture;
+    
+    sf::Vector2f directionVector;
+    float lengthToPlayer;
 
 public:
     Enemy(
@@ -12,5 +16,5 @@ public:
         sf::Vector2f size
     );
 
-    void update(float delta, const sf::Vector2f& playerPosition);
+    void update(float delta, Player& player);
 };
