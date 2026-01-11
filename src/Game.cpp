@@ -33,6 +33,7 @@ Game::Game()
     const sf::Vector2f obstacleSize(50.f, 50.f);
 
     obstacles.emplace_back(sf::Vector2f(400, 300), obstacleSize);
+    collisionManager.addObstacle(obstacles.back().getGlobalBounds());
 
     enemies.emplace_back(
         getRandomPositionNoCollision(player.getGlobalBounds(), { 50.f, 50.f }),
@@ -60,12 +61,17 @@ void Game::processEvents() {
 void Game::update(float delta) {
     player.update(delta);
 
+    sf::Vector2f playerDelta = player.getSpeedVector() * delta;
+    collisionManager.tryMove(player, playerDelta);
+
     for (auto& enemy : enemies) {
         enemy.behave(delta, player.getPosition());
 
+        sf::Vector2f enemyDelta = enemy.getSpeedVector() * delta; 
+        collisionManager.tryMove(enemy, enemyDelta);              
+
         if (player.getGlobalBounds().intersects(enemy.getGlobalBounds())) {
-            CollisionManager::resolveCollision(player, enemy.getGlobalBounds());
-            player.takeDamage(1);
+            player.takeDamage(1); // ❌ resolveCollision USUNIĘTE
         }
     }
 }

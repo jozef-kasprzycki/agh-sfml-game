@@ -12,7 +12,6 @@ EnemyChaser::EnemyChaser(
 }
 
 void EnemyChaser::behave(float delta, const sf::Vector2f& playerPos) {
-
     sf::Vector2f dir = playerPos - getPosition();
     float length = std::sqrt(dir.x * dir.x + dir.y * dir.y);
 
@@ -34,5 +33,5 @@ void EnemyChaser::behave(float delta, const sf::Vector2f& playerPos) {
 }
 
 void EnemyChaser::update(float delta) {
-    // logika ruchu wykonywana w Game przez CollisionManager
+    updateMovement(delta);
 }

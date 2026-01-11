@@ -3,7 +3,6 @@
 #include "GameObj.hpp"
 class Obstacle : public GameObj {
 private:
-    //static sf::Texture sharedTexture; // WSP�LNA TEKSTURA
 
 public:
     Obstacle(

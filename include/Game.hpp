@@ -5,6 +5,7 @@
 #include "PlayerBase.hpp"
 #include "EnemyChaser.hpp"
 #include "Obstacle.hpp"
+#include "CollisionManager.hpp"
 
 class Game {
 private:
@@ -14,6 +15,8 @@ private:
     PlayerBase player;
     std::vector<EnemyChaser> enemies;
     std::vector<Obstacle> obstacles;
+
+    CollisionManager collisionManager;
 
     void processEvents();
     void update(float delta);
