@@ -4,7 +4,7 @@
 
 class Enemy : public Movable {
 private:
-    static sf::Texture sharedTexture;
+    //static sf::Texture sharedTexture;
 
 public:
     Enemy(
