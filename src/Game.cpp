@@ -81,7 +81,7 @@ Game::Game()
 {
     const sf::Vector2f obstacleSize(50.f, 50.f);
     
-    int obstacleCount = getRandomObstacleCount();
+    int obstacleCount = 8;//getRandomObstacleCount();
 
     for (int i = 0; i < obstacleCount; ++i) {
         sf::Vector2f pos = getRandomPositionNoCollisionObstacle(
@@ -144,12 +144,9 @@ void Game::update(float delta) {
     for (auto& enemy : enemies) {
 
 		//pogoń za środkiem gracza
-        sf::FloatRect pb = player.getGlobalBounds();
-        sf::Vector2f playerCenter(
-            pb.left + pb.width / 2.f,
-            pb.top + pb.height / 2.f
-        );
-        enemy.update(delta, playerCenter);
+        //sf::FloatRect pb = player.getGlobalBounds();
+
+        enemy.update(delta, player);
         sf::Vector2f ed = enemy.getSpeedVector() * delta;
         collisionManager.tryMove(enemy, ed);
 
