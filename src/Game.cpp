@@ -86,7 +86,7 @@ Game::Game()
 
     const sf::Vector2f obstacleSize(50.f, 50.f);
 
-    int obstacleCount = 8 //getRandomObstacleCount();
+    int obstacleCount = 8; //getRandomObstacleCount();
 
     for (int i = 0; i < obstacleCount; ++i) {
         sf::Vector2f pos = getRandomPositionNoCollisionObstacle(
