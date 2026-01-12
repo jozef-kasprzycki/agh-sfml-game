@@ -76,16 +76,21 @@ sf::Vector2f getRandomPositionNoCollisionMultiple(
 
 Game::Game()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game"),
-    player(sf::Vector2f(10.f, 10.f), sf::Vector2f(50, 50)),
     collisionManager()
 {
+    player = std::make_unique<PlayerBasic>(
+        sf::Vector2f(10.f, 10.f),
+        sf::Vector2f(50.f, 50.f),
+        100
+    );
+
     const sf::Vector2f obstacleSize(50.f, 50.f);
-    
-    int obstacleCount = 8;//getRandomObstacleCount();
+
+    int obstacleCount = 8 //getRandomObstacleCount();
 
     for (int i = 0; i < obstacleCount; ++i) {
         sf::Vector2f pos = getRandomPositionNoCollisionObstacle(
-            player.getGlobalBounds(),
+            player->getGlobalBounds(),
             obstacleSize
         );
 
@@ -96,14 +101,12 @@ Game::Game()
     const sf::Vector2f enemySize(50.f, 50.f);
 
     sf::Vector2f enemyPos = getRandomPositionNoCollisionMultiple(
-        player.getGlobalBounds(),
+        player->getGlobalBounds(),
         obstacles,
         enemySize
     );
 
     enemies.emplace_back(enemyPos, enemySize);
-
-    
 }
 
 void Game::run() {
@@ -125,9 +128,9 @@ void Game::processEvents() {
 
 void Game::update(float delta) {
     // Aktualizacja klas przyjmujących czas jako paramter
-    player.update(delta);
-    sf::Vector2f pd = player.getSpeedVector() * delta;
-    collisionManager.tryMove(player, pd);
+    player->update(delta);
+    sf::Vector2f pd = player->getSpeedVector() * delta;
+    collisionManager.tryMove(*player, pd);
 
 
     /*
@@ -143,17 +146,15 @@ void Game::update(float delta) {
 
     for (auto& enemy : enemies) {
 
-		//pogoń za środkiem gracza
-        //sf::FloatRect pb = player.getGlobalBounds();
+        //pogoń za środkiem gracza
+        //sf::FloatRect pb = player->getGlobalBounds();
 
-        enemy.update(delta, player);
+        enemy.behave(delta, player->getPosition());
         sf::Vector2f ed = enemy.getSpeedVector() * delta;
         collisionManager.tryMove(enemy, ed);
 
-
         //enemy.update(delta, player.getBounds().getPosition());
     }
-
 }
 
 void Game::render() {
@@ -167,13 +168,11 @@ void Game::render() {
         obstacle.draw(window);
     }
 
-
-	//renderowanie wrogów
+    //renderowanie wrogów
     for (auto& enemy : enemies) {
         enemy.draw(window);
     }
 
-
-    player.draw(window);
+    player->draw(window);
     window.display();
 }
