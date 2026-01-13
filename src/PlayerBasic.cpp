@@ -9,7 +9,7 @@ PlayerBasic::PlayerBasic(
 )
     : PlayerBase(position, size, hp)
 {
-    setTexture(TextureManager::get("../assets/player.png"));
+    setTexture(TextureManager::get("../assets/player2.png"));
 }
 
 void PlayerBasic::handleInput() {

@@ -27,10 +27,20 @@ void GameObj::setPosition(sf::Vector2f pos) {
 
 void GameObj::setTexture(sf::Texture &texture){
     sprite.setTexture(texture);
-    auto b = sprite.getLocalBounds();
-    if (b.width > 0 && b.height > 0) {
-        sprite.setScale(targetSize.x / b.width, targetSize.y / b.height);
-    }
+    // auto b = sprite.getLocalBounds();
+    // if (b.width > 0 && b.height > 0) {
+    //     sprite.setScale(targetSize.x / b.width, targetSize.y / b.height);
+    // }
+
+    //
+    for (int i = 0; i < 5; ++i)
+        frames.push_back(sf::IntRect(i * 50, 0, 50, 50));
+        
+    setTextureRect(frames[0]); // pokaż pierwszą klatkę od razu
+}
+
+void GameObj::animate(int frameNum){
+    setTextureRect(frames[frameNum]);
 }
 
 void GameObj::setTextureRect(sf::IntRect rect) {
