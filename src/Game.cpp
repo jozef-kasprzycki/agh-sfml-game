@@ -1,5 +1,6 @@
 #include "Game.hpp"
 #include "CollisionManager.hpp"
+#include "LevelLoader.hpp"
 //#include <iostream>
 #include <random>
 
@@ -78,24 +79,25 @@ Game::Game()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game"),
     collisionManager()
 {
+    LevelData level = LevelLoader::loadFromFile("../levels/level_01.json");
+    window.setSize(level.size);
+
     player = std::make_unique<PlayerBasic>(
         sf::Vector2f(10.f, 10.f),
         sf::Vector2f(50.f, 50.f),
         100
     );
 
-    const sf::Vector2f obstacleSize(50.f, 50.f);
+    player->setPosition(level.playerStart);
 
-    int obstacleCount = 8; //getRandomObstacleCount();
-
-    for (int i = 0; i < obstacleCount; ++i) {
-        sf::Vector2f pos = getRandomPositionNoCollisionObstacle(
-            player->getGlobalBounds(),
-            obstacleSize
+    for (const auto& obs : level.obstacles) {
+        obstacles.emplace_back(
+            obs.bounds.getPosition(), 
+            obs.bounds.getSize(),
+            obs.texture_path
         );
-
-        obstacles.emplace_back(pos, obstacleSize);
-        collisionManager.addObstacle(obstacles.back().getGlobalBounds());
+        
+        collisionManager.addObstacle(obs.bounds);
     }
 
     const sf::Vector2f enemySize(50.f, 50.f);

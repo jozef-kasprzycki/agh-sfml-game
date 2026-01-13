@@ -25,13 +25,18 @@ LevelData LevelLoader::loadFromFile(const std::string& path) {
     level.playerStart.y = j["player"]["position"][1];
 
     // Przeszkody
+    ObstacleData obs_temp_data;
+
     for (const auto& o : j["obstacles"]) {
-        level.obstacles.emplace_back(
-            o["x"],
-            o["y"],
-            o["w"],
-            o["h"]
-        );
+        obs_temp_data.bounds = sf::FloatRect(
+                o["x"].get<float>(),
+                o["y"].get<float>(),
+                o["w"].get<float>(),
+                o["h"].get<float>()
+            );
+        obs_temp_data.texture_path = o["texture_path"].get<std::string>();
+        level.obstacles.push_back(obs_temp_data);
+        
     }
 
     return level;
