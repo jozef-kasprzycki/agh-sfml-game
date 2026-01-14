@@ -28,6 +28,10 @@ target_link_libraries(agh-sfml-game
 file(COPY ${CMAKE_SOURCE_DIR}/assets
      DESTINATION ${CMAKE_BINARY_DIR})
 
+file(COPY ${CMAKE_SOURCE_DIR}/levels
+     DESTINATION ${CMAKE_BINARY_DIR})
+
+
 include(FetchContent)
 
 FetchContent_Declare(
