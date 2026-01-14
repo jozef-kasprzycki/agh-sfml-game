@@ -100,15 +100,15 @@ Game::Game()
         collisionManager.addObstacle(obs.bounds);
     }
 
-    const sf::Vector2f enemySize(50.f, 50.f);
-
-    sf::Vector2f enemyPos = getRandomPositionNoCollisionMultiple(
-        player->getGlobalBounds(),
-        obstacles,
-        enemySize
-    );
-
-    enemies.emplace_back(enemyPos, enemySize);
+    for (const auto& enemy : level.enemies) {
+        /*
+            TODO: switch(enemy.type){...}
+        */
+        enemies.emplace_back(
+            enemy.bounds.getPosition(), 
+            enemy.bounds.getSize()
+        );
+    }
 }
 
 void Game::run() {

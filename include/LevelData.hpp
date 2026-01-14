@@ -13,8 +13,15 @@ struct ObstacleData {
     std::string texture_path;
 };
 
+struct EnemyData {
+    sf::FloatRect bounds;
+    std::string texture_path;
+    // Jeszcze jakieś pola w przyszłości
+};
+
 struct LevelData {
     sf::Vector2u size;
     sf::Vector2f playerStart;
     std::vector<struct ObstacleData> obstacles;
+    std::vector<struct EnemyData> enemies;
 };
