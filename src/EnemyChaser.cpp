@@ -1,4 +1,4 @@
-#include "EnemyChaser.hpp"
+﻿#include "EnemyChaser.hpp"
 #include "TextureManager.hpp"
 #include <cmath>
 
@@ -9,27 +9,40 @@ EnemyChaser::EnemyChaser(
     : EnemyBase(position, size, 50)
 {
     setTexture(TextureManager::get("../assets/enemy.png"));
+
+    max_speed = 250.f;     // maksymalna prędkość
+    min_speed = 0.f;       // wróg może się całkiem zatrzymać
 }
 
 void EnemyChaser::behave(float delta, const sf::Vector2f& playerPos) {
-    sf::Vector2f dir = playerPos - getPosition();
-    float length = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+    sf::Vector2f toPlayer = playerPos - getPosition();
+    float distance = std::sqrt(toPlayer.x * toPlayer.x + toPlayer.y * toPlayer.y);
 
-    if (length > detectionRadius)
+    // Gracz za daleko → łagodne hamowanie
+    if (distance > detectionRadius) {
+        // płynne wytracanie prędkości (brak teleportów)
+        speed_vector *= 0.90f;
         return;
+    }
 
-    if (length != 0.f)
-        dir /= length;
+    // Normalizacja kierunku
+    if (distance > 0.f)
+        toPlayer /= distance;
 
-    speed_vector += dir * (600.f * delta);
+    // Prędkość docelowa (arrive)
+    float desiredSpeed = max_speed;
 
-    float speed = std::sqrt(
-        speed_vector.x * speed_vector.x +
-        speed_vector.y * speed_vector.y
-    );
+    // Im bliżej gracza, tym wolniej (brak szarpania)
+    if (distance < chaseRadius) {
+        desiredSpeed = max_speed * (distance / chaseRadius);
+    }
 
-    if (speed > max_speed)
-        speed_vector *= (max_speed / speed);
+    sf::Vector2f desiredVelocity = toPlayer * desiredSpeed;
+
+    // Steering – płynne dochodzenie do prędkości
+    const float steeringStrength = 6.f; // im większe, tym bardziej agresywny wróg
+
+    speed_vector += (desiredVelocity - speed_vector) * steeringStrength * delta;
 }
 
 void EnemyChaser::update(float delta) {
