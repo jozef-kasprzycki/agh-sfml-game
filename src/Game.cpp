@@ -1,7 +1,7 @@
 #include "Game.hpp"
 #include "CollisionManager.hpp"
 #include "LevelLoader.hpp"
-//#include <iostream>
+#include <iostream>
 #include <random>
 
 //funkcja zwraca losową pozycję, która nie koliduje z Playerem i zapewnia, że obiekt mieści się w oknie gry
@@ -79,9 +79,21 @@ Game::Game()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game"),
     collisionManager()
 {
+    /*
+        Konstruktor klasy gry; wykonywany raz, w momencie 
+        uruchomienia gry. Tutaj są odczytywane informacje 
+        na temat poziomu gry, a następnie inicjowane wszystkie 
+        obiekty gry.
+    */
+
+    // Pobieranie danych o poziomie z pliku
     LevelData level = LevelLoader::loadFromFile("../levels/level_01.json");
     window.setSize(level.size);
 
+    /*
+        Definicja obiektu gracza (inicjalizacja) i przechowywanie
+        jako wskaźnik
+    */
     player = std::make_unique<PlayerBasic>(
         sf::Vector2f(10.f, 10.f),
         sf::Vector2f(50.f, 50.f),
@@ -90,6 +102,10 @@ Game::Game()
 
     player->setPosition(level.playerStart);
 
+    /*
+        Inicjalizacja przeszkód w liście przeszkód oraz dodanie
+        ich współrzędnych do CollisionManagera
+    */
     for (const auto& obs : level.obstacles) {
         obstacles.emplace_back(
             obs.bounds.getPosition(), 
@@ -115,6 +131,10 @@ Game::Game()
 }
 
 void Game::run() {
+    /*
+        Główna pętla gry. Każde wykonanie to jedna klatka.
+    */
+
     while (window.isOpen()) {
         float delta = clock.restart().asSeconds();
         processEvents();
@@ -124,6 +144,11 @@ void Game::run() {
 }
 
 void Game::processEvents() {
+    /*
+        Funkcja sprawdzająca "eventy", takie jak 
+        naciśnięcie krzyżyka (zamknięcie okienka).
+    */
+
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
@@ -132,22 +157,20 @@ void Game::processEvents() {
 }
 
 void Game::update(float delta) {
-    // Aktualizacja klas przyjmujących czas jako paramter
+    /*
+            Funkcja wywoływana co każdą klatkę (w 
+        głównej pętli gry). Jako argument przyjmuje 
+        parametr `delta`, czyli czas renderu klatki.
+            Wywołuje funkcję update(delta), którą 
+        posiadają wszystkie klasy dziedziczące z 
+        klasy Entity, czyli "żywych" (zmiennych w
+        czasie) obiektów gry.
+    */
+
     player->update(delta);
     sf::Vector2f pd = player->getSpeedVector() * delta;
     collisionManager.tryMove(*player, pd);
-
-
-    /*
-    for (const auto& obstacle : obstacles) {
-        if (player.getGlobalBounds().intersects(obstacle.getGlobalBounds())) {
-            CollisionManager::resolveCollision(
-                player,
-                obstacle.getGlobalBounds()
-            );
-        }
-    }
-        */
+    std::cout << 1/delta << " FPS       z\n";
 
     for (auto& enemy : enemies_chasers) {
 
@@ -157,18 +180,16 @@ void Game::update(float delta) {
         enemy.behave(delta, player->getPosition());
         sf::Vector2f ed = enemy.getSpeedVector() * delta;
         collisionManager.tryMove(enemy, ed);
-
-        //enemy.update(delta, player.getBounds().getPosition());
     }
 }
 
 void Game::render() {
-    //window.clear();
-    window.clear(sf::Color(30, 30, 30)); //sprawdza widoczność player i obstacle
-    //window.clear(sf::Color::White); //sprawdza czy nie ma przezroczystości
-    // Dodać renderowanie różnych elementów gry
+    // Czyszczenie poprzedniego ekranu
+    window.clear();
+  
+    player->draw(window);
 
-    //renderowanie przeszkód
+    // Renderowanie przeszkód
     for (auto& obstacle : obstacles) {
         obstacle.draw(window);
     }
@@ -178,6 +199,6 @@ void Game::render() {
         enemy.draw(window);
     }
 
-    player->draw(window);
+    // Wyświetlanie okna
     window.display();
 }
