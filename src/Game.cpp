@@ -116,15 +116,18 @@ Game::Game()
         collisionManager.addObstacle(obs.bounds);
     }
 
-    const sf::Vector2f enemySize(50.f, 50.f);
-
-    sf::Vector2f enemyPos = getRandomPositionNoCollisionMultiple(
-        player->getGlobalBounds(),
-        obstacles,
-        enemySize
-    );
-
-    enemies.emplace_back(enemyPos, enemySize);
+    for (const auto& enemy : level.enemies) {
+        if (enemy.type == "chaser") {
+            enemies_chasers.emplace_back(
+                enemy.bounds.getPosition(), 
+                enemy.bounds.getSize()
+            );
+        } else if (enemy.type == "bomber") { // bomber - cokolwiek
+            std::cout << "bomber\n";
+        } else {
+            std::cout << enemy.type << " is invalid enemy name.\n";
+        }
+    }
 }
 
 void Game::run() {
@@ -169,8 +172,10 @@ void Game::update(float delta) {
     collisionManager.tryMove(*player, pd);
     std::cout << 1/delta << " FPS       z\n";
 
-    for (auto& enemy : enemies) {
-        // Pogoń za graczem każdego enemy
+    for (auto& enemy : enemies_chasers) {
+
+        //pogoń za środkiem gracza
+        //sf::FloatRect pb = player->getGlobalBounds();
 
         enemy.behave(delta, player->getPosition());
         sf::Vector2f ed = enemy.getSpeedVector() * delta;
@@ -181,17 +186,16 @@ void Game::update(float delta) {
 void Game::render() {
     // Czyszczenie poprzedniego ekranu
     window.clear();
+  
+    player->draw(window);
 
     // Renderowanie przeszkód
     for (auto& obstacle : obstacles) {
         obstacle.draw(window);
     }
 
-    // Renderowanie gracza    
-    player->draw(window);
-    
-    // Renderowanie wrogów
-    for (auto& enemy : enemies) {
+    //renderowanie wrogów
+    for (auto& enemy : enemies_chasers) {
         enemy.draw(window);
     }
 
