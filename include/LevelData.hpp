@@ -15,8 +15,11 @@ struct ObstacleData {
 
 struct EnemyData {
     sf::FloatRect bounds;
-    std::string texture_path;
-    // Jeszcze jakieś pola w przyszłości
+    std::string type;
+    // Jeszcze jakieś pola w przyszłości:
+    // float max_hp;
+    // float givenDamage;
+    // float damageRate;
 };
 
 struct LevelData {

@@ -48,7 +48,7 @@ LevelData LevelLoader::loadFromFile(const std::string& path) {
                 o["w"].get<float>(),
                 o["h"].get<float>()
             );
-        enemy_temp_data.texture_path = o["texture_path"].get<std::string>();
+        enemy_temp_data.type = o["type"].get<std::string>();
         level.enemies.push_back(enemy_temp_data);
         
     }

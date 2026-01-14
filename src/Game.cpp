@@ -101,13 +101,16 @@ Game::Game()
     }
 
     for (const auto& enemy : level.enemies) {
-        /*
-            TODO: switch(enemy.type){...}
-        */
-        enemies.emplace_back(
-            enemy.bounds.getPosition(), 
-            enemy.bounds.getSize()
-        );
+        if (enemy.type == "chaser") {
+            enemies_chasers.emplace_back(
+                enemy.bounds.getPosition(), 
+                enemy.bounds.getSize()
+            );
+        } else if (enemy.type == "bomber") { // bomber - cokolwiek
+            std::cout << "bomber\n";
+        } else {
+            std::cout << enemy.type << " is invalid enemy name.\n";
+        }
     }
 }
 
@@ -146,7 +149,7 @@ void Game::update(float delta) {
     }
         */
 
-    for (auto& enemy : enemies) {
+    for (auto& enemy : enemies_chasers) {
 
         //pogoń za środkiem gracza
         //sf::FloatRect pb = player->getGlobalBounds();
@@ -160,8 +163,8 @@ void Game::update(float delta) {
 }
 
 void Game::render() {
-    window.clear();
-    //window.clear(sf::Color(30, 30, 30)); //sprawdza widoczność player i obstacle
+    //window.clear();
+    window.clear(sf::Color(30, 30, 30)); //sprawdza widoczność player i obstacle
     //window.clear(sf::Color::White); //sprawdza czy nie ma przezroczystości
     // Dodać renderowanie różnych elementów gry
 
@@ -171,7 +174,7 @@ void Game::render() {
     }
 
     //renderowanie wrogów
-    for (auto& enemy : enemies) {
+    for (auto& enemy : enemies_chasers) {
         enemy.draw(window);
     }
 
