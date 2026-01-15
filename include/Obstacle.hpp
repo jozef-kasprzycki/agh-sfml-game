@@ -3,12 +3,12 @@
 #include "GameObj.hpp"
 class Obstacle : public GameObj {
 private:
-    static sf::Texture sharedTexture; // WSP�LNA TEKSTURA
 
 public:
     Obstacle(
         sf::Vector2f position,
-        sf::Vector2f size
+        sf::Vector2f size,
+        const std::string& texture_path
     );
 
     Obstacle(const Obstacle&) = delete;

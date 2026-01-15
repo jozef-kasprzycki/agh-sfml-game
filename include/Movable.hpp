@@ -8,19 +8,35 @@ protected:
     float max_speed; // px/s
     float min_speed; // px/s
 
+    // Ogranicza d³ugoœæ wektora prêdkoœci do max_speed
+    void limitSpeed();
+
 public:
     Movable(
         sf::Vector2f position,
         sf::Vector2f size
     );
 
-    sf::Vector2f getSpeedVector();
+    virtual ~Movable() = default;
 
+    // Dostêp do prêdkoœci
+    sf::Vector2f getSpeedVector() const;
+
+    // Ustawianie / modyfikacja prêdkoœci
+    void setSpeed(const sf::Vector2f& speed);
+    void addSpeed(const sf::Vector2f& deltaSpeed);
+
+    // Aktualizacja pozycji na podstawie deltaTime
+    void updateMovement(float delta);
+
+    // Reakcje fizyczne
     void bounceX();
     void bounceY();
-    void move(sf::Vector2f);
     void stop();
 
+    // Ruch bezpoœredni (np. przez CollisionManager)
+    void move(sf::Vector2f);
+
     // ?
-	//friend class CollisionManager;
+    //friend class CollisionManager;
 };

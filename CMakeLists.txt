@@ -25,5 +25,24 @@ target_link_libraries(agh-sfml-game
     sfml-audio
     sfml-network)
 
-    file(COPY ${CMAKE_SOURCE_DIR}/assets
+file(COPY ${CMAKE_SOURCE_DIR}/assets
      DESTINATION ${CMAKE_BINARY_DIR})
+
+file(COPY ${CMAKE_SOURCE_DIR}/levels
+     DESTINATION ${CMAKE_BINARY_DIR})
+
+
+include(FetchContent)
+
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.2
+)
+
+FetchContent_MakeAvailable(nlohmann_json)
+
+target_link_libraries(agh-sfml-game
+    PRIVATE
+        nlohmann_json::nlohmann_json
+)

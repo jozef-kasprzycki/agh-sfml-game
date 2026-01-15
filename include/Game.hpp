@@ -1,10 +1,13 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "CollisionManager.hpp"
-#include "Player.hpp"
+#include "PlayerBase.hpp"
+#include "PlayerBasic.hpp"
 #include "Obstacle.hpp"
-#include "Enemy.hpp"
+#include "EnemyBase.hpp"
+#include "EnemyChaser.hpp"
 #include <vector>
+#include <memory>
 
 class Game {
 private:
@@ -12,10 +15,10 @@ private:
     sf::Clock clock;
 
     CollisionManager collisionManager;
-    Player player;
+    std::unique_ptr<PlayerBase> player;
 
     std::vector<Obstacle> obstacles;
-    std::vector<Enemy> enemies;
+    std::vector<EnemyChaser> enemies_chasers;
 
     void processEvents();
     void update(float delta);

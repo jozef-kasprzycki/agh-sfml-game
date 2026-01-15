@@ -1,0 +1,20 @@
+{
+  "name": "Test level",
+  "size": { "width": 1000, "height": 600 },
+
+  "player": {
+    "position": [0, 0]
+  },
+
+  "obstacles": [
+    { "x": 10, "y": 30, "w": 400, "h": 50, "texture_path": "../assets/obastacle_wall_horizontal.png" },
+    { "x": 7, "y": 200, "w": 400, "h": 50, "texture_path": "../assets/obastacle_wall_horizontal.png" },
+    { "x": 290, "y": 400, "w": 132, "h": 107, "texture_path": "../assets/obstacle_rect.png" },
+    { "x": 600, "y": 10, "w": 50, "h": 400, "texture_path": "../assets/obstacle_wall.png" }
+  ],
+
+  "enemies": [
+    { "x": 300, "y": 400, "w": 50, "h": 50, "type": "chaser" },
+    { "x": 500, "y": 145, "w": 50, "h": 50, "type": "bomber" }
+  ]
+}

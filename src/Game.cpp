@@ -1,6 +1,7 @@
 #include "Game.hpp"
 #include "CollisionManager.hpp"
-//#include <iostream>
+#include "LevelLoader.hpp"
+#include <iostream>
 #include <random>
 
 //funkcja zwraca losową pozycję, która nie koliduje z Playerem i zapewnia, że obiekt mieści się w oknie gry
@@ -76,37 +77,64 @@ sf::Vector2f getRandomPositionNoCollisionMultiple(
 
 Game::Game()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game"),
-    player(sf::Vector2f(10.f, 10.f), sf::Vector2f(50, 50)),
     collisionManager()
 {
-    const sf::Vector2f obstacleSize(50.f, 50.f);
-    
-    int obstacleCount = getRandomObstacleCount();
+    /*
+        Konstruktor klasy gry; wykonywany raz, w momencie 
+        uruchomienia gry. Tutaj są odczytywane informacje 
+        na temat poziomu gry, a następnie inicjowane wszystkie 
+        obiekty gry.
+    */
 
-    for (int i = 0; i < obstacleCount; ++i) {
-        sf::Vector2f pos = getRandomPositionNoCollisionObstacle(
-            player.getGlobalBounds(),
-            obstacleSize
-        );
+    // Pobieranie danych o poziomie z pliku
+    LevelData level = LevelLoader::loadFromFile("../levels/level_01.json");
+    window.setSize(level.size);
 
-        obstacles.emplace_back(pos, obstacleSize);
-        collisionManager.addObstacle(obstacles.back().getGlobalBounds());
-    }
-
-    const sf::Vector2f enemySize(50.f, 50.f);
-
-    sf::Vector2f enemyPos = getRandomPositionNoCollisionMultiple(
-        player.getGlobalBounds(),
-        obstacles,
-        enemySize
+    /*
+        Definicja obiektu gracza (inicjalizacja) i przechowywanie
+        jako wskaźnik
+    */
+    player = std::make_unique<PlayerBasic>(
+        sf::Vector2f(10.f, 10.f),
+        sf::Vector2f(50.f, 50.f),
+        100
     );
 
-    enemies.emplace_back(enemyPos, enemySize);
+    player->setPosition(level.playerStart);
 
-    
+    /*
+        Inicjalizacja przeszkód w liście przeszkód oraz dodanie
+        ich współrzędnych do CollisionManagera
+    */
+    for (const auto& obs : level.obstacles) {
+        obstacles.emplace_back(
+            obs.bounds.getPosition(), 
+            obs.bounds.getSize(),
+            obs.texture_path
+        );
+        
+        collisionManager.addObstacle(obs.bounds);
+    }
+
+    for (const auto& enemy : level.enemies) {
+        if (enemy.type == "chaser") {
+            enemies_chasers.emplace_back(
+                enemy.bounds.getPosition(), 
+                enemy.bounds.getSize()
+            );
+        } else if (enemy.type == "bomber") { // bomber - cokolwiek
+            std::cout << "bomber\n";
+        } else {
+            std::cout << enemy.type << " is invalid enemy name.\n";
+        }
+    }
 }
 
 void Game::run() {
+    /*
+        Główna pętla gry. Każde wykonanie to jedna klatka.
+    */
+
     while (window.isOpen()) {
         float delta = clock.restart().asSeconds();
         processEvents();
@@ -116,6 +144,11 @@ void Game::run() {
 }
 
 void Game::processEvents() {
+    /*
+        Funkcja sprawdzająca "eventy", takie jak 
+        naciśnięcie krzyżyka (zamknięcie okienka).
+    */
+
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
@@ -124,59 +157,48 @@ void Game::processEvents() {
 }
 
 void Game::update(float delta) {
-    // Aktualizacja klas przyjmujących czas jako paramter
-    player.update(delta);
-    sf::Vector2f pd = player.getSpeedVector() * delta;
-    collisionManager.tryMove(player, pd);
-
-
     /*
-    for (const auto& obstacle : obstacles) {
-        if (player.getGlobalBounds().intersects(obstacle.getGlobalBounds())) {
-            CollisionManager::resolveCollision(
-                player,
-                obstacle.getGlobalBounds()
-            );
-        }
-    }
-        */
+            Funkcja wywoływana co każdą klatkę (w 
+        głównej pętli gry). Jako argument przyjmuje 
+        parametr `delta`, czyli czas renderu klatki.
+            Wywołuje funkcję update(delta), którą 
+        posiadają wszystkie klasy dziedziczące z 
+        klasy Entity, czyli "żywych" (zmiennych w
+        czasie) obiektów gry.
+    */
 
-    for (auto& enemy : enemies) {
+    player->update(delta);
+    sf::Vector2f pd = player->getSpeedVector() * delta;
+    collisionManager.tryMove(*player, pd);
+    std::cout << 1/delta << " FPS       z\n";
 
-		//pogoń za środkiem gracza
-        sf::FloatRect pb = player.getGlobalBounds();
-        sf::Vector2f playerCenter(
-            pb.left + pb.width / 2.f,
-            pb.top + pb.height / 2.f
-        );
-        enemy.update(delta, playerCenter);
+    for (auto& enemy : enemies_chasers) {
+
+        //pogoń za środkiem gracza
+        //sf::FloatRect pb = player->getGlobalBounds();
+
+        enemy.behave(delta, player->getPosition());
         sf::Vector2f ed = enemy.getSpeedVector() * delta;
         collisionManager.tryMove(enemy, ed);
-
-
-        //enemy.update(delta, player.getBounds().getPosition());
     }
-
 }
 
 void Game::render() {
+    // Czyszczenie poprzedniego ekranu
     window.clear();
-    //window.clear(sf::Color(30, 30, 30)); //sprawdza widoczność player i obstacle
-    //window.clear(sf::Color::White); //sprawdza czy nie ma przezroczystości
-    // Dodać renderowanie różnych elementów gry
+  
+    player->draw(window);
 
-    //renderowanie przeszkód
+    // Renderowanie przeszkód
     for (auto& obstacle : obstacles) {
         obstacle.draw(window);
     }
 
-
-	//renderowanie wrogów
-    for (auto& enemy : enemies) {
+    //renderowanie wrogów
+    for (auto& enemy : enemies_chasers) {
         enemy.draw(window);
     }
 
-
-    player.draw(window);
+    // Wyświetlanie okna
     window.display();
 }
