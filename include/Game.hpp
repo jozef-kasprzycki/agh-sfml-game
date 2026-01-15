@@ -18,7 +18,7 @@ private:
     std::unique_ptr<PlayerBase> player;
 
     std::vector<Obstacle> obstacles;
-    std::vector<EnemyChaser> enemies;
+    std::vector<std::unique_ptr<EnemyBase>> enemies;
 
     void processEvents();
     void update(float delta);

@@ -108,7 +108,10 @@ Game::Game()
         enemySize
     );
 
-    enemies.emplace_back(enemyPos, enemySize);
+    enemies.push_back(
+        std::make_unique<EnemyChaser>(enemyPos, enemySize)
+    );
+
 }
 
 void Game::run() {
@@ -129,35 +132,24 @@ void Game::processEvents() {
 }
 
 void Game::update(float delta) {
-    // Aktualizacja klas przyjmujących czas jako paramter
     player->update(delta);
     sf::Vector2f pd = player->getSpeedVector() * delta;
     collisionManager.tryMove(*player, pd);
 
-
-    /*
-    for (const auto& obstacle : obstacles) {
-        if (player.getGlobalBounds().intersects(obstacle.getGlobalBounds())) {
-            CollisionManager::resolveCollision(
-                player,
-                obstacle.getGlobalBounds()
-            );
-        }
-    }
-        */
-
     for (auto& enemy : enemies) {
 
-        //pogoń za środkiem gracza
-        //sf::FloatRect pb = player->getGlobalBounds();
+        // 1. AI
+        enemy->behave(delta, player->getPosition());
 
-        enemy.behave(delta, player->getPosition());
-        sf::Vector2f ed = enemy.getSpeedVector() * delta;
-        collisionManager.tryMove(enemy, ed);
+        // 2. kolizje
+        sf::Vector2f ed = enemy->getSpeedVector() * delta;
+        collisionManager.tryMove(*enemy, ed);
 
-        //enemy.update(delta, player.getBounds().getPosition());
+        // 3. ruch
+        enemy->update(delta);
     }
 }
+
 
 void Game::render() {
     window.clear();
@@ -172,7 +164,7 @@ void Game::render() {
 
     //renderowanie wrogów
     for (auto& enemy : enemies) {
-        enemy.draw(window);
+        enemy->draw(window);
     }
 
     player->draw(window);
