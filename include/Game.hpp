@@ -6,6 +6,7 @@
 #include "Obstacle.hpp"
 #include "EnemyBase.hpp"
 #include "EnemyChaser.hpp"
+#include "LevelData.hpp"
 #include <vector>
 #include <memory>
 
@@ -19,6 +20,8 @@ private:
 
     std::vector<Obstacle> obstacles;
     std::vector<EnemyChaser> enemies_chasers;
+
+    struct LevelData level;
 
     void processEvents();
     void update(float delta);

@@ -87,7 +87,7 @@ Game::Game()
     */
 
     // Pobieranie danych o poziomie z pliku
-    LevelData level = LevelLoader::loadFromFile("../levels/level_01.json");
+    level = LevelLoader::loadFromFile("../levels/level_01.json");
     window.setSize(level.size);
 
     /*
