@@ -7,6 +7,11 @@ class EnemyBase : public Entity {
 protected:
     float detectionRadius;
     float chaseRadius;
+
+    // losowoœæ per instancja
+    float detectionRadiusFactor;
+    float chaseRadiusFactor;
+
     EnemyStateMachine stateMachine;
 
 public:
