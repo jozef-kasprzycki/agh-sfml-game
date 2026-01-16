@@ -16,6 +16,9 @@ LevelData LevelLoader::loadFromFile(const std::string& path) {
 
     LevelData level;
 
+    // Tytuł poziomu
+    level.name = j["name"];
+
     // Rozmiar mapy
     level.size.x = j["size"]["width"];
     level.size.y = j["size"]["height"];

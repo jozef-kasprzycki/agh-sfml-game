@@ -85,11 +85,7 @@ Game::Game()
         na temat poziomu gry, a następnie inicjowane wszystkie 
         obiekty gry.
     */
-
-    // Pobieranie danych o poziomie z pliku
-    level = LevelLoader::loadFromFile("../levels/level_01.json");
-    window.setSize(level.size);
-
+   
     /*
         Definicja obiektu gracza (inicjalizacja) i przechowywanie
         jako wskaźnik
@@ -99,7 +95,11 @@ Game::Game()
         sf::Vector2f(50.f, 50.f),
         100
     );
-
+    
+    // Pobieranie danych o poziomie z pliku
+    LevelData level = LevelLoader::loadFromFile("../levels/level_01.json");
+    window.setTitle(level.name);
+    window.setSize(level.size);
     player->setPosition(level.playerStart);
 
     /*
