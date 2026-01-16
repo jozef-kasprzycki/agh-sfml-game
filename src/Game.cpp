@@ -97,9 +97,13 @@ Game::Game()
     );
     
     // Pobieranie danych o poziomie z pliku
-    LevelData level = LevelLoader::loadFromFile("../levels/level_01.json");
+    level = LevelLoader::loadFromFile("../levels/level_01.json");
     window.setTitle(level.name);
     window.setSize(level.size);
+    
+    // Inicjalizacja background po załadowaniu levelu
+    background = std::make_unique<Background>(level.size);
+    background->set(level.background);
     player->setPosition(level.playerStart);
 
     /*
@@ -204,6 +208,9 @@ void Game::update(float delta) {
 void Game::render() {
     // Czyszczenie poprzedniego ekranu
     window.clear();
+    
+    // Rysowanie tła
+    background->draw(window);
   
     player->draw(window);
 

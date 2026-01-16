@@ -23,6 +23,9 @@ LevelData LevelLoader::loadFromFile(const std::string& path) {
     level.size.x = j["size"]["width"];
     level.size.y = j["size"]["height"];
 
+    // Tekstura tła
+    level.background = j["background"];
+
     // Pozycja gracza
     level.playerStart.x = j["player"]["position"][0];
     level.playerStart.y = j["player"]["position"][1];
