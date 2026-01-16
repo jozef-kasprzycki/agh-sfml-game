@@ -1,11 +1,18 @@
 #pragma once
 #include "Entity.hpp"
+#include "EnemyStateMachine.hpp"
+#include <SFML/System/Vector2.hpp>
 
-// Bazowa klasa dla wszystkich wrogów
 class EnemyBase : public Entity {
 protected:
     float detectionRadius;
     float chaseRadius;
+
+    // losowoœæ per instancja
+    float detectionRadiusFactor;
+    float chaseRadiusFactor;
+
+    EnemyStateMachine stateMachine;
 
 public:
     EnemyBase(
@@ -14,5 +21,18 @@ public:
         int hp
     );
 
-    virtual void behave(float delta, const sf::Vector2f& playerPos) = 0;
+    // RUCH
+    void update(float delta) override;
+
+    // AI / FSM
+    virtual void behave(float delta, const sf::Vector2f& playerPos);
+
+    float getDetectionRadius() const;
+    float getChaseRadius() const;
+    float getMaxSpeed() const;
+
+    void stopSoft();
+    void steerTowards(const sf::Vector2f& desiredVelocity, float delta);
+
+    EnemyStateMachine& getStateMachine();
 };

@@ -8,7 +8,4 @@ public:
         sf::Vector2f position,
         sf::Vector2f size
     );
-
-    void update(float delta) override;
-    void behave(float delta, const sf::Vector2f& playerPos) override;
 };
