@@ -1,6 +1,7 @@
 {
   "name": "Test level",
   "size": { "width": 1000, "height": 600 },
+  "background": "../assets/background_1.png",
 
   "player": {
     "position": [0, 0]

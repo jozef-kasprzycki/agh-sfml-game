@@ -23,7 +23,9 @@ struct EnemyData {
 };
 
 struct LevelData {
+    std::string name;
     sf::Vector2u size;
+    std::string background;
     sf::Vector2f playerStart;
     std::vector<struct ObstacleData> obstacles;
     std::vector<struct EnemyData> enemies;

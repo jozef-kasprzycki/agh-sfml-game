@@ -16,9 +16,15 @@ LevelData LevelLoader::loadFromFile(const std::string& path) {
 
     LevelData level;
 
+    // Tytuł poziomu
+    level.name = j["name"];
+
     // Rozmiar mapy
     level.size.x = j["size"]["width"];
     level.size.y = j["size"]["height"];
+
+    // Tekstura tła
+    level.background = j["background"];
 
     // Pozycja gracza
     level.playerStart.x = j["player"]["position"][0];
