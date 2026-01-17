@@ -9,9 +9,9 @@ MenuScreen::MenuScreen() {
         // handle error
     }
     text.setFont(font);
-    text.setString("Menu: Press Enter to Play");
+    text.setString("Menu: \n\tPress Enter to Play\n\tPress Esc to quit");
     text.setCharacterSize(24);
-    text.setPosition(400, 300);
+    text.setPosition(350, 250);
 }
 
 void MenuScreen::handleEvents(sf::RenderWindow& window) {
@@ -21,6 +21,9 @@ void MenuScreen::handleEvents(sf::RenderWindow& window) {
             window.close();
         } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
             finished = true;
+        } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) 
+        {
+            exit(0);
         }
     }
 }
