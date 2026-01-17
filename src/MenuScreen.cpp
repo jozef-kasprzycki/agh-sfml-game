@@ -1,9 +1,8 @@
 #include "MenuScreen.hpp"
+#include "TextureManager.hpp"
 
 MenuScreen::MenuScreen() {
-    if (!backgroundTexture.loadFromFile("../assets/menu_bg.png")) {
-        // handle error
-    }
+    backgroundTexture = TextureManager::get("../assets/menu_bg.png");
     backgroundSprite.setTexture(backgroundTexture);
 
     if (!font.loadFromFile("../assets/font.ttf")) {

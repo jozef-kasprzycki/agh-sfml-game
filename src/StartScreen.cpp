@@ -1,9 +1,8 @@
 #include "StartScreen.hpp"
+#include "TextureManager.hpp"
 
 StartScreen::StartScreen() {
-    if (!backgroundTexture.loadFromFile("../assets/start_bg.png")) {
-        // handle error
-    }
+    backgroundTexture = TextureManager::get("../assets/start_bg.png");
     backgroundSprite.setTexture(backgroundTexture);
 
     if (!font.loadFromFile("../assets/font.ttf")) { // adjust path

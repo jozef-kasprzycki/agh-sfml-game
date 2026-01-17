@@ -1,9 +1,8 @@
 #include "GameOverScreen.hpp"
+#include "TextureManager.hpp"
 
 GameOverScreen::GameOverScreen(bool win) : isWin(win) {
-    if (!backgroundTexture.loadFromFile("../assets/gameover_bg.png")) {
-        // handle error
-    }
+    backgroundTexture = TextureManager::get("../assets/gameover_bg.png");
     backgroundSprite.setTexture(backgroundTexture);
 
     if (!font.loadFromFile("../assets/font.ttf")) {
