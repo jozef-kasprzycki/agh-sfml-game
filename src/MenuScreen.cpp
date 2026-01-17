@@ -1,6 +1,6 @@
 #include "MenuScreen.hpp"
 #include "TextureManager.hpp"
-
+#include <iostream> // temp
 MenuScreen::MenuScreen() {
     backgroundTexture = TextureManager::get("../assets/menu_bg.png");
     backgroundSprite.setTexture(backgroundTexture);
@@ -9,7 +9,7 @@ MenuScreen::MenuScreen() {
         // handle error
     }
     text.setFont(font);
-    text.setString("Menu: \n\tPress Enter to Play\n\tPress Esc to quit");
+    text.setString("Menu: \n\tPress Enter to Play\n\tPress S to go to Settings\n\tPress Esc to quit");
     text.setCharacterSize(24);
     text.setPosition(350, 250);
 }
@@ -20,10 +20,17 @@ void MenuScreen::handleEvents(sf::RenderWindow& window) {
         if (event.type == sf::Event::Closed) {
             window.close();
         } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
+            next_screen = "game";
             finished = true;
         } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) 
         {
             exit(0);
+        } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S) 
+        {
+            // Open Settings screen (ekran ustawień jeszcze nie istnieje)
+            std::cout << "Opening settings!\n"; // temp
+            next_screen = "settings";
+            finished = true;
         }
     }
 }
@@ -44,5 +51,5 @@ bool MenuScreen::isFinished() const {
 }
 
 std::string MenuScreen::getNextScreen() const {
-    return "game";
+    return next_screen;
 }

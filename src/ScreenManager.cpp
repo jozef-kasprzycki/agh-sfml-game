@@ -3,6 +3,7 @@
 #include "MenuScreen.hpp"
 #include "GameScreen.hpp"
 #include "GameOverScreen.hpp"
+#include "SettingsScreen.hpp"
 
 ScreenManager::ScreenManager()
     : window(sf::VideoMode(1000, 600), "AGH SFML Game")
@@ -29,6 +30,8 @@ void ScreenManager::run() {
                 currentScreen = std::make_unique<GameOverScreen>(false);
             } else if (next == "start") {
                 currentScreen = std::make_unique<StartScreen>();
+            } else if (next == "settings") {
+                currentScreen = std::make_unique<SettingsScreen>();
             }
             // Add more if needed
         }
