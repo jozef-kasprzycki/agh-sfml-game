@@ -1,8 +1,8 @@
-#include "Game.hpp"
+#include "ScreenManager.hpp"
 
 int main() {
-	Game game;
-	game.run();
+    ScreenManager screenManager;
+    screenManager.run();
 
     return 0;
 }
