@@ -2,6 +2,9 @@
 #include <SFML/Graphics.hpp>
 
 class Screen {
+protected:
+    sf::Texture backgroundTexture;
+    sf::Sprite backgroundSprite;
 public:
     virtual ~Screen() = default;
     virtual void handleEvents(sf::RenderWindow& window) = 0;

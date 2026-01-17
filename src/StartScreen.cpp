@@ -1,6 +1,11 @@
 #include "StartScreen.hpp"
 
 StartScreen::StartScreen() {
+    if (!backgroundTexture.loadFromFile("../assets/start_bg.png")) {
+        // handle error
+    }
+    backgroundSprite.setTexture(backgroundTexture);
+
     if (!font.loadFromFile("../assets/font.ttf")) { // adjust path
         // handle error
     }
@@ -27,6 +32,7 @@ void StartScreen::update(float delta) {
 
 void StartScreen::render(sf::RenderWindow& window) {
     window.clear();
+    window.draw(backgroundSprite);
     window.draw(text);
     window.display();
 }

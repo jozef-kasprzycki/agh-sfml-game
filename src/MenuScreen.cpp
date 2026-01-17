@@ -1,6 +1,11 @@
 #include "MenuScreen.hpp"
 
 MenuScreen::MenuScreen() {
+    if (!backgroundTexture.loadFromFile("../assets/menu_bg.png")) {
+        // handle error
+    }
+    backgroundSprite.setTexture(backgroundTexture);
+
     if (!font.loadFromFile("../assets/font.ttf")) {
         // handle error
     }
@@ -27,6 +32,7 @@ void MenuScreen::update(float delta) {
 
 void MenuScreen::render(sf::RenderWindow& window) {
     window.clear();
+    window.draw(backgroundSprite);
     window.draw(text);
     window.display();
 }

@@ -1,6 +1,11 @@
 #include "GameOverScreen.hpp"
 
 GameOverScreen::GameOverScreen(bool win) : isWin(win) {
+    if (!backgroundTexture.loadFromFile("../assets/gameover_bg.png")) {
+        // handle error
+    }
+    backgroundSprite.setTexture(backgroundTexture);
+
     if (!font.loadFromFile("../assets/font.ttf")) {
         // handle error
     }
@@ -27,6 +32,7 @@ void GameOverScreen::update(float delta) {
 
 void GameOverScreen::render(sf::RenderWindow& window) {
     window.clear();
+    window.draw(backgroundSprite);
     window.draw(text);
     window.display();
 }
