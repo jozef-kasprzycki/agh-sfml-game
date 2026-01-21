@@ -1,7 +1,6 @@
 #include "EnemyChaseState.hpp"
-#include "EnemyBase.hpp"
-#include "EnemyStateMachine.hpp"
 #include "EnemyIdleState.hpp"
+#include "EnemyBase.hpp"
 #include <cmath>
 
 void EnemyChaseState::update(
@@ -10,10 +9,16 @@ void EnemyChaseState::update(
     float delta,
     const sf::Vector2f& playerPos
 ) {
-    sf::Vector2f toPlayer = playerPos - enemy.getPosition();
-    float dist = std::sqrt(toPlayer.x * toPlayer.x + toPlayer.y * toPlayer.y);
+    // Ka¿dy enemy œciga swój w³asny punkt wokó³ gracza
+    sf::Vector2f target = enemy.getChaseTarget(playerPos);
+    sf::Vector2f toTarget = target - enemy.getPosition();
 
-    // histereza – wyjœcie dopiero POZA detectionRadius
+    float dist = std::sqrt(
+        toTarget.x * toTarget.x +
+        toTarget.y * toTarget.y
+    );
+
+    // Wyjœcie z poœcigu z histerez¹
     if (dist > enemy.getDetectionRadius() * 1.1f) {
         machine.changeState(
             enemy,
@@ -23,12 +28,14 @@ void EnemyChaseState::update(
     }
 
     if (dist > 0.f)
-        toPlayer /= dist;
+        toTarget /= dist;
 
     float desiredSpeed = enemy.getMaxSpeed();
+
+    // Zwolnienie przy zbli¿aniu siê do celu
     if (dist < enemy.getChaseRadius()) {
         desiredSpeed *= (dist / enemy.getChaseRadius());
     }
 
-    enemy.steerTowards(toPlayer * desiredSpeed, delta);
+    enemy.steerTowards(toTarget * desiredSpeed, delta);
 }
