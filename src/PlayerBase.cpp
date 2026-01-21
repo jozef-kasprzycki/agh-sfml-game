@@ -6,17 +6,20 @@ PlayerBase::PlayerBase(
     sf::Vector2f size,
     int hp
 )
-    : Entity(position, size, hp),
-    hp(hp),
-    inputDirection(0.f, 0.f)
+// TU BY£ B£¥D: Entity oczekuje CombatStats, a dostawa³o int.
+// Tworzymy CombatStats(hp, attack=10)
+    : Entity(position, size, CombatStats(hp, 10)),
+    inputDirection(0.f, 0.f),
+    shootDirection(0.f, 0.f)
 {
     max_speed = 600.f;
     min_speed = 100.f;
 }
 
 void PlayerBase::takeDamage(int dmg) {
-    hp -= dmg;
-    std::cout << "\nPlayer hitted, hp=" << hp;
+    // U¿ywamy metody z klasy bazowej Entity
+    Entity::takeDamage(dmg);
+    std::cout << "\nPlayer hit, hp=" << getHP();
 }
 
 void PlayerBase::update(float delta) {
@@ -24,17 +27,25 @@ void PlayerBase::update(float delta) {
     applyMovementPhysics(delta);
 }
 
+bool PlayerBase::isShooting() const {
+    return shootDirection.x != 0.f || shootDirection.y != 0.f;
+}
+
+sf::Vector2f PlayerBase::getShootDirection() const {
+    return shootDirection;
+}
+
 void PlayerBase::applyMovementPhysics(float delta) {
-    //* Y axis
+    // * Y axis
     if (inputDirection.y < 0.f) { // W
         if (speed_vector.y > -max_speed)
             speed_vector.y -= max_speed * delta;
-        animate(1); // Animacja poruszania siÄ™ w gÃ³rÄ™
+        animate(1);
     }
     else if (inputDirection.y > 0.f) { // S
         if (speed_vector.y < max_speed)
             speed_vector.y += max_speed * delta;
-        animate(2); // W dÃ³Å‚
+        animate(2);
     }
     else if (speed_vector.y > min_speed) {
         speed_vector.y -= max_speed * delta;
@@ -44,19 +55,19 @@ void PlayerBase::applyMovementPhysics(float delta) {
     }
     else {
         speed_vector.y = 0.f;
-        animate(0); // StojÄ…ca 
+        animate(0);
     }
 
-    //* X axis
+    // * X axis
     if (inputDirection.x < 0.f) { // A
         if (speed_vector.x > -max_speed)
             speed_vector.x -= max_speed * delta;
-        animate(4); // W prawo
+        animate(4);
     }
     else if (inputDirection.x > 0.f) { // D
         if (speed_vector.x < max_speed)
             speed_vector.x += max_speed * delta;
-        animate(3); // W lewo
+        animate(3);
     }
     else if (speed_vector.x > min_speed) {
         speed_vector.x -= max_speed * delta;

@@ -3,18 +3,30 @@
 Entity::Entity(
     sf::Vector2f position,
     sf::Vector2f size,
-    int hp
+    const CombatStats& stats
 )
     : Movable(position, size),
-    hp(hp)
+    combatStats(stats)
 {
 }
 
+void Entity::update(float delta) {
+    // PUSTE! Nie wywo³ujemy tu updateMovement(delta), 
+    // poniewa¿ ruch obs³uguje CollisionManager w GameScreen.
+}
+
 int Entity::getHP() const {
-    return hp;
+    return combatStats.hp;
+}
+
+int Entity::getAttack() const {
+    return combatStats.attack;
+}
+
+bool Entity::isAlive() const {
+    return combatStats.hp > 0;
 }
 
 void Entity::takeDamage(int dmg) {
-    hp -= dmg;
-    if (hp < 0) hp = 0;
+    combatStats.hp -= dmg;
 }

@@ -6,7 +6,7 @@ EnemyChaser::EnemyChaser(
     sf::Vector2f position,
     sf::Vector2f size
 )
-    : EnemyBase(position, size, 50)
+    : EnemyBase(position, size) // Usunięto ", 50" - HP jest ustawiane wewnątrz EnemyBase
 {
     setTexture(TextureManager::get("../assets/enemy.png"));
 

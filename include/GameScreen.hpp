@@ -8,6 +8,7 @@
 #include "EnemyChaser.hpp"
 #include "LevelData.hpp"
 #include "Backgorund.hpp"
+#include "ProjectileManager.hpp"
 #include <vector>
 #include <memory>
 #include <string>
@@ -20,6 +21,10 @@ private:
     std::vector<Obstacle> obstacles;
     std::vector<std::unique_ptr<EnemyBase>> enemies_chasers;
     std::unique_ptr<Background> background;
+
+    // Dodano managera pocisków
+    ProjectileManager projectileManager;
+
     struct LevelData level;
     bool finished = false;
     bool isWin = false;

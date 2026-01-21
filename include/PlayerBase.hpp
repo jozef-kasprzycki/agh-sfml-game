@@ -7,10 +7,13 @@ class PlayerBase : public Entity {
 protected:
     int hp;
 
-    // Kierunek ruchu przekazywany przez klasê pochodn¹
+    // Kierunek ruchu
     sf::Vector2f inputDirection; // {-1, 0, 1}
 
-    // Wspólna fizyka ruchu gracza (przyspieszanie + hamowanie)
+    // Kierunek strza³u (Nowoœæ)
+    sf::Vector2f shootDirection;
+
+    // Wspólna fizyka ruchu gracza
     void applyMovementPhysics(float delta);
 
     // Ka¿dy gracz ustawia inputDirection
@@ -26,6 +29,9 @@ public:
     virtual ~PlayerBase() = default;
 
     void update(float delta) override;
-
     void takeDamage(int dmg);
+
+    // Gettery do strzelania (Nowoœæ)
+    bool isShooting() const;
+    sf::Vector2f getShootDirection() const;
 };
