@@ -17,8 +17,8 @@ protected:
 public:
     EnemyBase(
         sf::Vector2f position,
-        sf::Vector2f size,
-        int hp
+        sf::Vector2f size
+        // int hp - usuniêto, bo w .cpp te¿ go nie ma
     );
 
     // RUCH

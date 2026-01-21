@@ -4,10 +4,12 @@
 
 EnemyBase::EnemyBase(
     sf::Vector2f position,
-    sf::Vector2f size,
-    int hp
+    sf::Vector2f size
 )
-    : Entity(position, size, hp),
+    : Entity(position,
+        size,
+        CombatStats(50, 10)
+    ),
     detectionRadius(500.f),
     chaseRadius(300.f)
 {
@@ -27,7 +29,8 @@ EnemyBase::EnemyBase(
 }
 
 void EnemyBase::update(float delta) {
-    updateMovement(delta);
+    // Usuniêto updateMovement(delta);
+    // Ruch jest aplikowany w GameScreen::update przez CollisionManager
 }
 
 void EnemyBase::behave(float delta, const sf::Vector2f& playerPos) {

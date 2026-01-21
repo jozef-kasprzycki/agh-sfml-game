@@ -13,6 +13,7 @@ PlayerBasic::PlayerBasic(
 }
 
 void PlayerBasic::handleInput() {
+    // Ruch
     inputDirection = { 0.f, 0.f };
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
@@ -24,4 +25,11 @@ void PlayerBasic::handleInput() {
         inputDirection.x = -1.f;
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         inputDirection.x = 1.f;
+
+    // Strzelanie
+    shootDirection = { 0.f, 0.f };
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))    shootDirection = { 0.f, -1.f };
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))  shootDirection = { 0.f,  1.f };
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))  shootDirection = { -1.f, 0.f };
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) shootDirection = { 1.f, 0.f };
 }
