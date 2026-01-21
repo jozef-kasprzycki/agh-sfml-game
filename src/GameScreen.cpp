@@ -1,6 +1,7 @@
+#include <bits/stdc++.h>
+#include <iostream>
 #include "GameScreen.hpp"
 #include "LevelLoader.hpp"
-#include <iostream>
 
 // Helper functions copied from Game.cpp
 sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(
@@ -120,6 +121,29 @@ GameScreen::GameScreen() : collisionManager() {
             std::cout << enemy.type << " is invalid enemy name.\n";
         }
     }
+
+    // Corner info: informacje typu FPS z boku ekranu
+    if (!font.loadFromFile("../assets/font.ttf")) 
+        { std::cerr << "Blad ladowania czcionki!\n"; }
+        
+    // Style dla info w roku ekranu
+    leftCornerInfo.setFont(font);
+    leftCornerInfo.setCharacterSize(24);
+    leftCornerInfo.setPosition(10,10);
+    leftCornerInfo.setOutlineColor(sf::Color::Black);
+    
+    // Style dla powiadomień wyświetlanych na środku
+    centerInfo.setFont(font);
+    centerInfo.setCharacterSize(24);
+    centerInfo.setPosition(500, 300);
+    centerInfo.setOutlineColor(sf::Color::Black);
+    centerInfo.setFillColor(sf::Color::Red);
+    centerInfoInterval = 0.5;
+
+    timeElapsedSec = 0;
+
+    centerScreenNotifications.push_back({"Game started!", INFO, 2, 0});
+    centerScreenNotifications.push_back({"Game is going!", WARNING, 6, 0});
 }
 
 void GameScreen::handleEvents(sf::RenderWindow& window) {
@@ -132,6 +156,8 @@ void GameScreen::handleEvents(sf::RenderWindow& window) {
 }
 
 void GameScreen::update(float delta) {
+    timeElapsedSec += delta;
+
     player->update(delta);
     sf::Vector2f pd = player->getSpeedVector() * delta;
     collisionManager.tryMove(*player, pd);
@@ -151,6 +177,40 @@ void GameScreen::update(float delta) {
         finished = true;
         isWin = true;
     }
+
+    // Tutaj należy dodać konstrukcje warunkowe
+    // które dodają powidomienia, które są 
+    // wyświetlane na środku ekranu.
+
+    //if(player->getInjured()){
+    //     ...
+    //     centerScreenNotifications.append(...)
+    // }
+
+    // Aktualizacja powiadomień wyświetanych na środku ekranu
+    // iterując po liście powiadomień i dodając do wyświetlania 
+    // te nieprzeterminowane 
+    centerInfo.setString("");
+
+    for (auto& notification : centerScreenNotifications){
+        notification.elapsedTime += delta;
+        if (notification.elapsedTime < notification.lifetime)
+            centerInfo.setString(centerInfo.getString() + "\n" + notification.text);
+    }
+
+    // Wyśrodkowanie napisu
+    centerInfo.setOrigin(
+        centerInfo.getGlobalBounds().width/2, 
+        centerInfo.getGlobalBounds().height/2
+    );
+
+    // Wyświatlanie info w rogu ekranu:
+    // fps, czas, hp
+    leftCornerInfo.setString(
+        std::to_string((int)(1/delta)) + " FPS\nTime: " 
+        + std::to_string((int)timeElapsedSec) + " sec."
+        + "\nHP: " + std::to_string(player->getHP())
+    );
 }
 
 void GameScreen::render(sf::RenderWindow& window) {
@@ -166,6 +226,9 @@ void GameScreen::render(sf::RenderWindow& window) {
     for (auto& enemy : enemies_chasers) {
         enemy->draw(window);
     }
+
+    window.draw(leftCornerInfo);
+    window.draw(centerInfo);
 
     window.display();
 }

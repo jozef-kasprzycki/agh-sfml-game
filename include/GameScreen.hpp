@@ -13,6 +13,15 @@
 #include <string>
 #include <random>
 
+enum NotificationType {INFO, WARNING};
+
+struct ScreenNotification {
+    std::string text;
+    NotificationType type;
+    float lifetime;
+    float elapsedTime;
+};
+
 class GameScreen : public Screen {
 private:
     CollisionManager collisionManager;
@@ -23,6 +32,17 @@ private:
     struct LevelData level;
     bool finished = false;
     bool isWin = false;
+
+    sf::Font font;
+
+    sf::Text leftCornerInfo;
+    sf::Text centerInfo;
+    float centerInfoLifetime;
+    float centerInfoInterval;
+
+    std::vector<ScreenNotification> centerScreenNotifications;
+
+    float timeElapsedSec;
 
     sf::Vector2f getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size);
     int getRandomObstacleCount();
