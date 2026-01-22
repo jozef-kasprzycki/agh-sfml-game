@@ -3,10 +3,15 @@
 #include <iostream>
 
 AuthScreen::AuthScreen()
-    : userManager("../data/users.json"),
+// ZMIANA: Œcie¿ka wychodzi dwa poziomy wy¿ej (z build/Debug/ do g³ównego folderu projektu)
+// Dziêki temu plik users.json nie zostanie usuniêty przy czyszczeniu projektu (Rebuild/Clean).
+    : userManager("../../data/users.json"), //na linuxie: userManager("../data/users.json"),
     currentState(AuthState::Menu)
 {
-    if (!font.loadFromFile("../assets/font.ttf")) {}
+    // Zak³adamy, ¿e font jest w assets (œcie¿ka relatywna do pliku exe w build/Debug)
+    if (!font.loadFromFile("../assets/font.ttf")) {
+        // Obs³uga b³êdu ³adowania fontu (opcjonalnie)
+    }
 
     titleText.setFont(font);
     titleText.setCharacterSize(40);
@@ -42,19 +47,22 @@ void AuthScreen::handleEvents(sf::RenderWindow& window) {
 }
 
 void AuthScreen::handleTextInput(sf::Uint32 unicode) {
+    // Backspace
     if (unicode == 8) {
         if (!currentInput.empty()) currentInput.pop_back();
     }
+    // Enter
     else if (unicode == 13) {
         processEnter();
     }
+    // Znaki drukowalne (ASCII)
     else if (unicode < 128 && unicode > 31) {
         currentInput += static_cast<char>(unicode);
     }
 }
 
 void AuthScreen::processEnter() {
-    errorText.setString("");
+    errorText.setString(""); // Czyœæ poprzednie b³êdy
 
     switch (currentState) {
     case AuthState::Menu:
@@ -70,29 +78,26 @@ void AuthScreen::processEnter() {
         break;
 
     case AuthState::LoginInputUser:
-        // ZMIANA: Sprawdzamy istnienie u¿ytkownika OD RAZU
+        // Walidacja natychmiastowa: czy taki u¿ytkownik w ogóle istnieje?
         if (userManager.userExists(currentInput)) {
-            // U¿ytkownik istnieje -> przechodzimy do has³a
             tempUsername = currentInput;
             currentState = AuthState::LoginInputPass;
             infoText.setString("LOGIN: Enter Password:");
             currentInput.clear();
         }
         else {
-            // U¿ytkownik nie istnieje -> B£¥D i zostañ w tym samym stanie
             errorText.setString("User does not exist!");
-            // Opcjonalnie: czyœcimy input lub zostawiamy do poprawy
-            // currentInput.clear(); 
+            // Zostajemy w tym samym stanie, u¿ytkownik mo¿e poprawiæ login
         }
         break;
 
     case AuthState::LoginInputPass:
         if (userManager.login(tempUsername, currentInput)) {
+            // Logowanie udane - sprawdŸ czy to Admin
             GameScreen::setAdminMode(tempUsername == "Admin");
             finished = true;
         }
         else {
-            // Skoro login sprawdziliœmy wczeœniej, to tutaj b³¹d musi dotyczyæ has³a
             errorText.setString("Invalid password! Press Enter to restart.");
             currentState = AuthState::Menu;
             infoText.setString("1. Create New Character\n2. Login");
@@ -138,6 +143,7 @@ void AuthScreen::processEnter() {
 }
 
 void AuthScreen::update(float delta) {
+    // Maskowanie has³a gwiazdkami
     if (currentState == AuthState::LoginInputPass ||
         currentState == AuthState::RegInputPass ||
         currentState == AuthState::RegConfirmPass)
@@ -151,7 +157,7 @@ void AuthScreen::update(float delta) {
 }
 
 void AuthScreen::render(sf::RenderWindow& window) {
-    window.clear(sf::Color(20, 20, 30));
+    window.clear(sf::Color(20, 20, 30)); // Ciemne t³o
     window.draw(titleText);
     window.draw(infoText);
     window.draw(inputText);
