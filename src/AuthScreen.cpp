@@ -3,14 +3,14 @@
 #include <iostream>
 
 AuthScreen::AuthScreen()
-// ZMIANA: Œcie¿ka wychodzi dwa poziomy wy¿ej (z build/Debug/ do g³ównego folderu projektu)
-// Dziêki temu plik users.json nie zostanie usuniêty przy czyszczeniu projektu (Rebuild/Clean).
+// ZMIANA: Å’cieÂ¿ka wychodzi dwa poziomy wyÂ¿ej (z build/Debug/ do gÂ³Ã³wnego folderu projektu)
+// DziÃªki temu plik users.json nie zostanie usuniÃªty przy czyszczeniu projektu (Rebuild/Clean).
     : userManager("../../data/users.json"), //na linuxie: userManager("../data/users.json"),
     currentState(AuthState::Menu)
 {
-    // Zak³adamy, ¿e font jest w assets (œcie¿ka relatywna do pliku exe w build/Debug)
+    // ZakÂ³adamy, Â¿e font jest w assets (Å“cieÂ¿ka relatywna do pliku exe w build/Debug)
     if (!font.loadFromFile("../assets/font.ttf")) {
-        // Obs³uga b³êdu ³adowania fontu (opcjonalnie)
+        // ObsÂ³uga bÂ³Ãªdu Â³adowania fontu (opcjonalnie)
     }
 
     titleText.setFont(font);
@@ -21,7 +21,7 @@ AuthScreen::AuthScreen()
     infoText.setFont(font);
     infoText.setCharacterSize(25);
     infoText.setPosition(100.f, 150.f);
-    infoText.setString("1. Create New Character\n2. Login");
+    infoText.setString("1. Create New Character\n2. Login\n3. Exit");
 
     inputText.setFont(font);
     inputText.setCharacterSize(30);
@@ -62,7 +62,7 @@ void AuthScreen::handleTextInput(sf::Uint32 unicode) {
 }
 
 void AuthScreen::processEnter() {
-    errorText.setString(""); // Czyœæ poprzednie b³êdy
+    errorText.setString(""); // CzyÅ“Ã¦ poprzednie bÂ³Ãªdy
 
     switch (currentState) {
     case AuthState::Menu:
@@ -74,11 +74,14 @@ void AuthScreen::processEnter() {
             currentState = AuthState::LoginInputUser;
             infoText.setString("LOGIN: Enter Username:");
         }
+        else if (currentInput == "3") {
+            std::exit(0);
+        }
         currentInput.clear();
         break;
 
     case AuthState::LoginInputUser:
-        // Walidacja natychmiastowa: czy taki u¿ytkownik w ogóle istnieje?
+        // Walidacja natychmiastowa: czy taki uÂ¿ytkownik w ogÃ³le istnieje?
         if (userManager.userExists(currentInput)) {
             tempUsername = currentInput;
             currentState = AuthState::LoginInputPass;
@@ -87,20 +90,20 @@ void AuthScreen::processEnter() {
         }
         else {
             errorText.setString("User does not exist!");
-            // Zostajemy w tym samym stanie, u¿ytkownik mo¿e poprawiæ login
+            // Zostajemy w tym samym stanie, uÂ¿ytkownik moÂ¿e poprawiÃ¦ login
         }
         break;
 
     case AuthState::LoginInputPass:
         if (userManager.login(tempUsername, currentInput)) {
-            // Logowanie udane - sprawdŸ czy to Admin
+            // Logowanie udane - sprawdÅ¸ czy to Admin
             GameScreen::setAdminMode(tempUsername == "Admin");
             finished = true;
         }
         else {
             errorText.setString("Invalid password! Press Enter to restart.");
             currentState = AuthState::Menu;
-            infoText.setString("1. Create New Character\n2. Login");
+            infoText.setString("1. Create New Character\n2. Login\n3. Exit");
         }
         currentInput.clear();
         break;
@@ -130,7 +133,7 @@ void AuthScreen::processEnter() {
             userManager.registerUser(tempUsername, tempPassword);
             errorText.setString("Account created! You can now Login.");
             currentState = AuthState::Menu;
-            infoText.setString("1. Create New Character\n2. Login");
+            infoText.setString("1. Create New Character\n2. Login\n3. Exit");
         }
         else {
             errorText.setString("Passwords do not match! Try again.");
@@ -143,7 +146,7 @@ void AuthScreen::processEnter() {
 }
 
 void AuthScreen::update(float delta) {
-    // Maskowanie has³a gwiazdkami
+    // Maskowanie hasÂ³a gwiazdkami
     if (currentState == AuthState::LoginInputPass ||
         currentState == AuthState::RegInputPass ||
         currentState == AuthState::RegConfirmPass)
@@ -157,7 +160,7 @@ void AuthScreen::update(float delta) {
 }
 
 void AuthScreen::render(sf::RenderWindow& window) {
-    window.clear(sf::Color(20, 20, 30)); // Ciemne t³o
+    window.clear(sf::Color(20, 20, 30)); // Ciemne tÂ³o
     window.draw(titleText);
     window.draw(infoText);
     window.draw(inputText);
@@ -165,5 +168,10 @@ void AuthScreen::render(sf::RenderWindow& window) {
     window.display();
 }
 
-bool AuthScreen::isFinished() const { return finished; }
-std::string AuthScreen::getNextScreen() const { return "menu"; }
+bool AuthScreen::isFinished() const {
+    return finished;
+}
+
+std::string AuthScreen::getNextScreen() const {
+    return "menu";
+}

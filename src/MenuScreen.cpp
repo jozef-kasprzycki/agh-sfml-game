@@ -1,15 +1,24 @@
 #include "MenuScreen.hpp"
 #include "TextureManager.hpp"
-#include <iostream> // temp
+#include "GameScreen.hpp" // Potrzebne do resetowania Admina przy wylogowaniu
+#include <iostream> 
+
 MenuScreen::MenuScreen() {
-    backgroundTexture = TextureManager::get("../assets/menu_bg.png");
-    backgroundSprite.setTexture(backgroundTexture);
+    // Zakładam, że TextureManager działa poprawnie
+    try {
+        backgroundTexture = TextureManager::get("../assets/menu_bg.png");
+        backgroundSprite.setTexture(backgroundTexture);
+    }
+    catch (...) {
+        // Fallback jeśli brak tła
+    }
 
     if (!font.loadFromFile("../assets/font.ttf")) {
         // handle error
     }
     text.setFont(font);
-    text.setString("Menu: \n\tPress Enter to Play\n\tPress S to go to Settings\n\tPress Esc to quit");
+    // Zmieniłem tekst "quit" na "Log Out", żeby pasował do akcji
+    text.setString("Menu: \n\tPress Enter to Play\n\tPress S to go to Settings\n\tPress Esc to Log Out");
     text.setCharacterSize(24);
     text.setPosition(350, 250);
 }
@@ -19,16 +28,21 @@ void MenuScreen::handleEvents(sf::RenderWindow& window) {
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             window.close();
-        } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
+        }
+        else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
             next_screen = "game";
             finished = true;
-        } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) 
+        }
+        else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
         {
-            exit(0);
-        } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S) 
+            // ZMIANA: Zamiast exit(0), wracamy do ekranu logowania
+            GameScreen::setAdminMode(false); // Resetujemy uprawnienia admina
+            next_screen = "auth";            // Ustawiamy ID ekranu logowania
+            finished = true;                 // Kończymy ten ekran
+        }
+        else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
         {
-            // Open Settings screen (ekran ustawień jeszcze nie istnieje)
-            std::cout << "Opening settings!\n"; // temp
+            std::cout << "Opening settings!\n";
             next_screen = "settings";
             finished = true;
         }
