@@ -66,7 +66,7 @@ void GameScreen::loadLevel(const std::string& path) {
         }
         else if (enemy.type == "gunner") {
             enemies_chasers.push_back(std::make_unique<EnemyGunner>(enemy.bounds.getPosition(), enemy.bounds.getSize()));
-        } // <--- TUTAJ BRAKOWA£O NAWIASU!
+        }
         else if (enemy.type == "boss") {
             enemies_chasers.push_back(std::make_unique<EnemyBoss>(enemy.bounds.getPosition(), enemy.bounds.getSize()));
         }
@@ -104,8 +104,13 @@ void GameScreen::update(float delta) {
         player->resetCooldown();
     }
 
-    for (const auto& door : doors) {
-        if (player->getGlobalBounds().intersects(door->getGlobalBounds())) pendingLevelLoad = door->getNextLevel();
+    // ZMIANA: Sprawdzamy kolizjê z drzwiami TYLKO jeœli nie ma wrogów
+    if (enemies_chasers.empty()) {
+        for (const auto& door : doors) {
+            if (player->getGlobalBounds().intersects(door->getGlobalBounds())) {
+                pendingLevelLoad = door->getNextLevel();
+            }
+        }
     }
 
     for (auto& enemy : enemies_chasers) {
@@ -131,7 +136,12 @@ void GameScreen::update(float delta) {
 void GameScreen::render(sf::RenderWindow& window) {
     window.clear();
     background->draw(window);
-    for (const auto& door : doors) door->draw(window);
+
+    // ZMIANA: Rysujemy drzwi TYLKO jeœli nie ma wrogów
+    if (enemies_chasers.empty()) {
+        for (const auto& door : doors) door->draw(window);
+    }
+
     player->draw(window);
     for (auto& obstacle : obstacles) obstacle.draw(window);
     for (auto& enemy : enemies_chasers) enemy->draw(window);
