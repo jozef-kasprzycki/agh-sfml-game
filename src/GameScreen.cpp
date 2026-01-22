@@ -2,8 +2,9 @@
 #include "LevelLoader.hpp"
 #include <iostream>
 #include "Projectile.hpp"
+#include "EnemyGunner.hpp" // NOWE
 
-// Helpery
+// Helpery... (bez zmian)
 sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size) {
     static std::random_device rd; static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
@@ -12,9 +13,7 @@ sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRec
     do { candidate.left = distX(gen); candidate.top = distY(gen); candidate.width = size.x; candidate.height = size.y; } while (candidate.intersects(forbidden));
     return { candidate.left, candidate.top };
 }
-
 int GameScreen::getRandomObstacleCount() { return 3; }
-
 sf::Vector2f GameScreen::getRandomPositionNoCollisionMultiple(const sf::FloatRect& playerBounds, const std::vector<Obstacle>& obstacles, const sf::Vector2f& size) {
     static std::random_device rd; static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
@@ -33,20 +32,12 @@ sf::Vector2f GameScreen::getRandomPositionNoCollisionMultiple(const sf::FloatRec
 }
 
 GameScreen::GameScreen() : collisionManager() {
-    // Gracz tworzony raz
-    player = std::make_unique<PlayerBasic>(
-        sf::Vector2f(0.f, 0.f),
-        sf::Vector2f(50.f, 50.f),
-        100
-    );
-
-    // £adujemy pierwszy poziom
+    player = std::make_unique<PlayerBasic>(sf::Vector2f(0.f, 0.f), sf::Vector2f(50.f, 50.f), 100);
     loadLevel("../levels/level_01.json");
 }
 
 void GameScreen::loadLevel(const std::string& path) {
     std::cout << "Loading level: " << path << std::endl;
-
     obstacles.clear();
     enemies_chasers.clear();
     doors.clear();
@@ -59,33 +50,22 @@ void GameScreen::loadLevel(const std::string& path) {
     player->setPosition(levelData.playerStart);
 
     for (const auto& obs : levelData.obstacles) {
-        obstacles.emplace_back(
-            obs.bounds.getPosition(),
-            obs.bounds.getSize(),
-            obs.texture_path
-        );
+        obstacles.emplace_back(obs.bounds.getPosition(), obs.bounds.getSize(), obs.texture_path);
         collisionManager.addObstacle(obs.bounds);
     }
-
     for (const auto& d : levelData.doors) {
-        doors.push_back(std::make_unique<Door>(
-            d.bounds.getPosition(),
-            d.bounds.getSize(),
-            d.next_level_path
-        ));
+        doors.push_back(std::make_unique<Door>(d.bounds.getPosition(), d.bounds.getSize(), d.next_level_path));
     }
 
     for (const auto& enemy : levelData.enemies) {
         if (enemy.type == "chaser") {
-            enemies_chasers.push_back(
-                std::make_unique<EnemyChaser>(
-                    enemy.bounds.getPosition(),
-                    enemy.bounds.getSize()
-                )
-            );
+            enemies_chasers.push_back(std::make_unique<EnemyChaser>(enemy.bounds.getPosition(), enemy.bounds.getSize()));
+        }
+        else if (enemy.type == "gunner") { // Obs³uga Gunnera
+            enemies_chasers.push_back(std::make_unique<EnemyGunner>(enemy.bounds.getPosition(), enemy.bounds.getSize()));
         }
         else if (enemy.type == "bomber") {
-            std::cout << "Spawn bomber at " << enemy.bounds.left << "\n";
+            std::cout << "Spawn bomber (placeholder)\n";
         }
     }
 }
@@ -99,20 +79,13 @@ void GameScreen::handleEvents(sf::RenderWindow& window) {
 
 void GameScreen::update(float delta) {
     if (!pendingLevelLoad.empty()) {
-        if (pendingLevelLoad == "WIN") {
-            finished = true;
-            isWin = true;
-        }
-        else {
-            loadLevel(pendingLevelLoad);
-            pendingLevelLoad.clear();
-        }
+        if (pendingLevelLoad == "WIN") { finished = true; isWin = true; }
+        else { loadLevel(pendingLevelLoad); pendingLevelLoad.clear(); }
         return;
     }
 
     player->update(delta);
-    sf::Vector2f pd = player->getSpeedVector() * delta;
-    collisionManager.tryMove(*player, pd);
+    collisionManager.tryMove(*player, player->getSpeedVector() * delta);
 
     if (player->isShooting() && player->canShoot()) {
         sf::Vector2f dir = player->getShootDirection();
@@ -120,16 +93,13 @@ void GameScreen::update(float delta) {
             player->getPosition() + sf::Vector2f(20, 20),
             sf::Vector2f(10.f, 10.f),
             dir * player->getProjectileSpeed(),
-            25,
-            ProjectileOwner::Player
+            25, ProjectileOwner::Player
         ));
         player->resetCooldown();
     }
 
     for (const auto& door : doors) {
-        if (player->getGlobalBounds().intersects(door->getGlobalBounds())) {
-            pendingLevelLoad = door->getNextLevel();
-        }
+        if (player->getGlobalBounds().intersects(door->getGlobalBounds())) pendingLevelLoad = door->getNextLevel();
     }
 
     for (auto& enemy : enemies_chasers) {
@@ -137,38 +107,29 @@ void GameScreen::update(float delta) {
         sf::Vector2f ed = enemy->getSpeedVector() * delta;
         collisionManager.tryMove(*enemy, ed);
         enemy->update(delta);
+
+        // NOWE: Próba strza³u przez wroga
+        auto bullet = enemy->tryShoot(delta, player->getPosition());
+        if (bullet) {
+            projectileManager.spawn(std::move(bullet));
+        }
     }
 
-    // UPDATE POCISKÓW - TERAZ PRZEKAZUJEMY PRZESZKODY
     projectileManager.update(delta, enemies_chasers, *player, obstacles);
 
     enemies_chasers.erase(std::remove_if(enemies_chasers.begin(), enemies_chasers.end(),
         [](const std::unique_ptr<EnemyBase>& e) { return e->getHP() <= 0; }), enemies_chasers.end());
 
-    if (player->getHP() <= 0) {
-        finished = true;
-        isWin = false;
-    }
+    if (player->getHP() <= 0) { finished = true; isWin = false; }
 }
 
 void GameScreen::render(sf::RenderWindow& window) {
     window.clear();
     background->draw(window);
-
-    for (const auto& door : doors) {
-        door->draw(window);
-    }
-
+    for (const auto& door : doors) door->draw(window);
     player->draw(window);
-
-    for (auto& obstacle : obstacles) {
-        obstacle.draw(window);
-    }
-
-    for (auto& enemy : enemies_chasers) {
-        enemy->draw(window);
-    }
-
+    for (auto& obstacle : obstacles) obstacle.draw(window);
+    for (auto& enemy : enemies_chasers) enemy->draw(window);
     projectileManager.render(window);
     window.display();
 }

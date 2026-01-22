@@ -8,10 +8,10 @@ EnemyBase::EnemyBase(
     sf::Vector2f size,
     int hp
 )
-// Tworzymy CombatStats dla wroga (domyœlny FireRate 1.0, Speed 0)
     : Entity(position, size, CombatStats(hp, 10, 1.0f, 0.f)),
     detectionRadius(500.f),
-    chaseRadius(300.f)
+    chaseRadius(300.f),
+    currentCooldown(0.f)
 {
     max_speed = 300.f;
     min_speed = 10.f;
@@ -31,7 +31,6 @@ EnemyBase::EnemyBase(
     float angle = angleDist(gen);
     float radius = radiusDist(gen);
 
-    // FIX: U¿ywamy jawnego konstruktora sf::Vector2f, ¿eby unikn¹æ b³êdu C3079
     chaseOffset = sf::Vector2f(
         std::cos(angle) * radius,
         std::sin(angle) * radius
@@ -42,6 +41,17 @@ EnemyBase::EnemyBase(
 
 void EnemyBase::update(float delta) {
     updateMovement(delta);
+
+    // Aktualizacja cooldownu
+    if (currentCooldown > 0.f) {
+        currentCooldown -= delta;
+    }
+}
+
+// Domyœlna implementacja - zwraca nullptr (brak strza³u)
+// EnemyGunner to nadpisze
+std::unique_ptr<Projectile> EnemyBase::tryShoot(float delta, const sf::Vector2f& playerPos) {
+    return nullptr;
 }
 
 void EnemyBase::behave(float delta, const sf::Vector2f& playerPos) {
@@ -72,6 +82,14 @@ void EnemyBase::steerTowards(const sf::Vector2f& desiredVelocity, float delta) {
     sf::Vector2f steering = desiredVelocity - speed_vector;
     speed_vector += steering * delta * 5.f;
     limitSpeed();
+}
+
+void EnemyBase::maintainSpeed(float targetSpeed) {
+    float currentSq = speed_vector.x * speed_vector.x + speed_vector.y * speed_vector.y;
+    if (currentSq > 0.001f) {
+        float scale = targetSpeed / std::sqrt(currentSq);
+        speed_vector *= scale;
+    }
 }
 
 EnemyStateMachine& EnemyBase::getStateMachine() {
