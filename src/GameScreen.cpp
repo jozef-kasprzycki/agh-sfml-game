@@ -46,21 +46,37 @@ sf::Vector2f GameScreen::getRandomPositionNoCollisionMultiple(const sf::FloatRec
 }
 
 GameScreen::GameScreen() : collisionManager() {
-    // Inicjalizacja pauzy
-    if (!font.loadFromFile("../assets/font.ttf")) {}
+
+    // ---- STYLE dla tekstów ----
+
+    if (!font.loadFromFile("../assets/font.ttf")) 
+        std::cerr << "Blad ladowania czcionki!\n";
+    
+    // Style dla info w roku ekranu
+    leftCornerInfo.setFont(font);
+    leftCornerInfo.setCharacterSize(24);
+    leftCornerInfo.setPosition(10,10);
+    leftCornerInfo.setOutlineColor(sf::Color::Black);
+    
+    // Style dla powiadomień wyświetlanych na środku
+    centerInfo.setFont(font);
+    centerInfo.setCharacterSize(24);
+    centerInfo.setPosition(500, 300);
+    centerInfo.setOutlineColor(sf::Color::Black);
+    centerInfo.setFillColor(sf::Color::Red);
+    centerInfoInterval = 0.5;
+
+    // Tekst ekranu pauzy
     pauseText.setFont(font);
-
-    // ZMIANA: Dodano instrukcj� wyj�cia spacj�
     pauseText.setString("PAUSED\nPress Enter to Resume\nPress Space to Quit");
-
     pauseText.setCharacterSize(40);
     pauseText.setFillColor(sf::Color::White);
-
     // Centrowanie tekstu (dostosowane do d�u�szego napisu)
     sf::FloatRect textRect = pauseText.getLocalBounds();
     pauseText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     pauseText.setPosition(500.f, 300.f);
 
+    // Maskownica ekranu w czasie pauzy
     pauseOverlay.setSize(sf::Vector2f(1000.f, 600.f));
     pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
 
@@ -70,6 +86,7 @@ GameScreen::GameScreen() : collisionManager() {
     player->setGodMode(isAdminMode);
 
     loadLevel("../levels/level_01.json");
+    timeElapsedSec = 0.f;
 }
 
 void GameScreen::loadLevel(const std::string& path) {
@@ -85,8 +102,10 @@ void GameScreen::loadLevel(const std::string& path) {
     background->set(levelData.background);
     player->setPosition(levelData.playerStart);
 
-    if (isAdminMode) player->setColor(sf::Color(255, 215, 0));
-    else player->setColor(sf::Color::White);
+    if (isAdminMode) 
+        player->setColor(sf::Color(255, 215, 0));
+    else 
+        player->setColor(sf::Color::White);
 
     for (const auto& obs : levelData.obstacles) {
         obstacles.emplace_back(obs.bounds.getPosition(), obs.bounds.getSize(), obs.texture_path);
@@ -111,28 +130,7 @@ void GameScreen::loadLevel(const std::string& path) {
         }
     }
 
-    // Corner info: informacje typu FPS z boku ekranu
-    if (!font.loadFromFile("../assets/font.ttf")) 
-        { std::cerr << "Blad ladowania czcionki!\n"; }
-        
-    // Style dla info w roku ekranu
-    leftCornerInfo.setFont(font);
-    leftCornerInfo.setCharacterSize(24);
-    leftCornerInfo.setPosition(10,10);
-    leftCornerInfo.setOutlineColor(sf::Color::Black);
-    
-    // Style dla powiadomień wyświetlanych na środku
-    centerInfo.setFont(font);
-    centerInfo.setCharacterSize(24);
-    centerInfo.setPosition(500, 300);
-    centerInfo.setOutlineColor(sf::Color::Black);
-    centerInfo.setFillColor(sf::Color::Red);
-    centerInfoInterval = 0.5;
-
-    timeElapsedSec = 0;
-
     centerScreenNotifications.push_back({"Game started!", INFO, 2, 0});
-    centerScreenNotifications.push_back({"Game is going!", WARNING, 6, 0});
 }
 
 void GameScreen::handleEvents(sf::RenderWindow& window) {
@@ -159,8 +157,8 @@ void GameScreen::handleEvents(sf::RenderWindow& window) {
 }
 
 void GameScreen::update(float delta) {
-    timeElapsedSec += delta;
     if (isPaused) return;
+    timeElapsedSec += delta;
 
     if (!pendingLevelLoad.empty()) {
         if (pendingLevelLoad == "WIN") { finished = true; isWin = true; }
@@ -221,6 +219,7 @@ void GameScreen::update(float delta) {
                 int dmg = enemy->getAttack();
                 int hpBefore = player->getHP();
                 player->takeDamage(dmg);
+                centerScreenNotifications.push_back({"You took " + std::to_string(dmg) + " damage!", WARNING, 2, 0});
 
                 if (player->getHP() < hpBefore) {
                     textManager->addText(std::to_string(dmg), player->getPosition(), sf::Color::Red);
@@ -234,15 +233,6 @@ void GameScreen::update(float delta) {
             }
         }
     }
-
-    // Tutaj należy dodać konstrukcje warunkowe
-    // które dodają powidomienia, które są 
-    // wyświetlane na środku ekranu.
-
-    //if(player->getInjured()){
-    //     ...
-    //     centerScreenNotifications.append(...)
-    // }
 
     // Aktualizacja powiadomień wyświetanych na środku ekranu
     // iterując po liście powiadomień i dodając do wyświetlania 
