@@ -4,20 +4,18 @@
 PlayerBase::PlayerBase(
     sf::Vector2f position,
     sf::Vector2f size,
-    int hp
+    const CombatStats& stats
 )
-// TU BY£ B£¥D: Entity oczekuje CombatStats, a dostawa³o int.
-// Tworzymy CombatStats(hp, attack=10)
-    : Entity(position, size, CombatStats(hp, 10)),
+    : Entity(position, size, stats),
     inputDirection(0.f, 0.f),
-    shootDirection(0.f, 0.f)
+    shootDirection(0.f, 0.f),
+    currentCooldown(0.f)
 {
     max_speed = 600.f;
     min_speed = 100.f;
 }
 
 void PlayerBase::takeDamage(int dmg) {
-    // U¿ywamy metody z klasy bazowej Entity
     Entity::takeDamage(dmg);
     std::cout << "\nPlayer hit, hp=" << getHP();
 }
@@ -25,6 +23,22 @@ void PlayerBase::takeDamage(int dmg) {
 void PlayerBase::update(float delta) {
     handleInput();
     applyMovementPhysics(delta);
+
+    if (currentCooldown > 0.f) {
+        currentCooldown -= delta;
+    }
+}
+
+bool PlayerBase::canShoot() const {
+    return currentCooldown <= 0.f;
+}
+
+void PlayerBase::resetCooldown() {
+    currentCooldown = combatStats.fireRate;
+}
+
+float PlayerBase::getProjectileSpeed() const {
+    return combatStats.projectileSpeed;
 }
 
 bool PlayerBase::isShooting() const {

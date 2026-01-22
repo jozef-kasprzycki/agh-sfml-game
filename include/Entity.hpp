@@ -3,19 +3,24 @@
 #include "CombatStats.hpp"
 
 // Bazowa klasa dla wszystkich "¿ywych" obiektów w grze
-// (Player, Enemy, Boss, NPC itd.)
 class Entity : public Movable {
-public:
-    Entity(sf::Vector2f pos, sf::Vector2f size, const CombatStats& stats);
+protected:
+    CombatStats combatStats;
 
-    virtual void update(float delta);
+public:
+    Entity(
+        sf::Vector2f position,
+        sf::Vector2f size,
+        const CombatStats& stats
+    );
+
     virtual ~Entity() = default;
 
     int getHP() const;
-    int getAttack() const;
-    void takeDamage(int dmg);
-    bool isAlive() const;
+    virtual void takeDamage(int dmg);
 
-protected:
-    CombatStats combatStats;
+    // Dostêp do statystyk
+    const CombatStats& getStats() const;
+
+    virtual void update(float delta) = 0;
 };
