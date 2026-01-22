@@ -3,10 +3,12 @@
 #include <iostream>
 
 AuthScreen::AuthScreen()
-    : userManager("../data/users.json"),
+    : userManager("../../data/users.json"),
     currentState(AuthState::Menu)
 {
-    if (!font.loadFromFile("../assets/font.ttf")) {}
+    if (!font.loadFromFile("../assets/font.ttf")) {
+        // Obs³uga b³êdu
+    }
 
     titleText.setFont(font);
     titleText.setCharacterSize(40);
@@ -16,7 +18,7 @@ AuthScreen::AuthScreen()
     infoText.setFont(font);
     infoText.setCharacterSize(25);
     infoText.setPosition(100.f, 150.f);
-    infoText.setString("1. Create New Character\n2. Login");
+    infoText.setString("1. Create New Character\n2. Login\n3. Exit");
 
     inputText.setFont(font);
     inputText.setCharacterSize(30);
@@ -66,23 +68,21 @@ void AuthScreen::processEnter() {
             currentState = AuthState::LoginInputUser;
             infoText.setString("LOGIN: Enter Username:");
         }
+        else if (currentInput == "3") {
+            std::exit(0);
+        }
         currentInput.clear();
         break;
 
     case AuthState::LoginInputUser:
-        // ZMIANA: Sprawdzamy istnienie u¿ytkownika OD RAZU
         if (userManager.userExists(currentInput)) {
-            // U¿ytkownik istnieje -> przechodzimy do has³a
             tempUsername = currentInput;
             currentState = AuthState::LoginInputPass;
             infoText.setString("LOGIN: Enter Password:");
             currentInput.clear();
         }
         else {
-            // U¿ytkownik nie istnieje -> B£¥D i zostañ w tym samym stanie
             errorText.setString("User does not exist!");
-            // Opcjonalnie: czyœcimy input lub zostawiamy do poprawy
-            // currentInput.clear(); 
         }
         break;
 
@@ -92,10 +92,9 @@ void AuthScreen::processEnter() {
             finished = true;
         }
         else {
-            // Skoro login sprawdziliœmy wczeœniej, to tutaj b³¹d musi dotyczyæ has³a
             errorText.setString("Invalid password! Press Enter to restart.");
             currentState = AuthState::Menu;
-            infoText.setString("1. Create New Character\n2. Login");
+            infoText.setString("1. Create New Character\n2. Login\n3. Exit");
         }
         currentInput.clear();
         break;
@@ -125,7 +124,7 @@ void AuthScreen::processEnter() {
             userManager.registerUser(tempUsername, tempPassword);
             errorText.setString("Account created! You can now Login.");
             currentState = AuthState::Menu;
-            infoText.setString("1. Create New Character\n2. Login");
+            infoText.setString("1. Create New Character\n2. Login\n3. Exit");
         }
         else {
             errorText.setString("Passwords do not match! Try again.");
@@ -159,5 +158,10 @@ void AuthScreen::render(sf::RenderWindow& window) {
     window.display();
 }
 
-bool AuthScreen::isFinished() const { return finished; }
-std::string AuthScreen::getNextScreen() const { return "menu"; }
+bool AuthScreen::isFinished() const {
+    return finished;
+}
+
+std::string AuthScreen::getNextScreen() const {
+    return "menu";
+}
