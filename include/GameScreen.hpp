@@ -17,6 +17,15 @@
 #include <string>
 #include <random>
 
+enum NotificationType {INFO, WARNING};
+
+struct ScreenNotification {
+    std::string text;
+    NotificationType type;
+    float lifetime;
+    float elapsedTime;
+};
+
 class GameScreen : public Screen {
 private:
     CollisionManager collisionManager;
@@ -36,13 +45,22 @@ private:
     bool finished = false;
     bool isWin = false;
 
+    sf::Font font;
+
+    sf::Text leftCornerInfo;
+    sf::Text centerInfo;
+    float centerInfoLifetime;
+    float centerInfoInterval;
+
+    std::vector<ScreenNotification> centerScreenNotifications;
+
+    float timeElapsedSec;
     // Zmienne pauzy
     bool isPaused = false;
-    sf::Font font;
     sf::Text pauseText;
     sf::RectangleShape pauseOverlay;
 
-    // NOWE: Zmienna przechowuj¹ca ID nastêpnego ekranu (jeœli jest pusta, u¿ywamy logiki win/lose)
+    // NOWE: Zmienna przechowujÂ¹ca ID nastÃªpnego ekranu (jeÅ“li jest pusta, uÂ¿ywamy logiki win/lose)
     std::string nextScreenID;
 
     std::string pendingLevelLoad;

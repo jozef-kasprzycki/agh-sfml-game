@@ -24,8 +24,8 @@ struct LevelData {
     sf::Vector2u size;
     std::string background;
     sf::Vector2f playerStart;
-
-    std::vector<ObstacleData> obstacles;
-    std::vector<EnemyData> enemies;
+    std::vector<struct ObstacleData> obstacles;
+    std::vector<struct EnemyData> enemies;
+    std::string next_level_filename;
     std::vector<DoorData> doors; // Lista drzwi
 };
