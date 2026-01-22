@@ -291,13 +291,13 @@ void GameScreen::render(sf::RenderWindow& window) {
     projectileManager.render(window);
     textManager->render(window);
 
+    window.draw(leftCornerInfo);
+    window.draw(centerInfo);
+    
     if (isPaused) {
         window.draw(pauseOverlay);
         window.draw(pauseText);
     }
-
-    window.draw(leftCornerInfo);
-    window.draw(centerInfo);
 
     window.display();
 }
