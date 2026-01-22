@@ -1,8 +1,8 @@
 #include "GameObj.hpp"
-#include <SFML/Graphics.hpp> // ensure FloatRect & Transformable are available
+#include <SFML/Graphics.hpp>
 
-GameObj::GameObj(sf::Vector2f position, sf::Vector2f size) 
-    : targetSize(size) 
+GameObj::GameObj(sf::Vector2f position, sf::Vector2f size)
+    : targetSize(size)
 {
     sprite.setPosition(position);
 }
@@ -25,21 +25,15 @@ void GameObj::setPosition(sf::Vector2f pos) {
     sprite.setPosition(pos);
 }
 
-void GameObj::setTexture(sf::Texture &texture){
+void GameObj::setTexture(sf::Texture& texture) {
     sprite.setTexture(texture);
-    // auto b = sprite.getLocalBounds();
-    // if (b.width > 0 && b.height > 0) {
-    //     sprite.setScale(targetSize.x / b.width, targetSize.y / b.height);
-    // }
-
-    // Do wywalenia 
     for (int i = 0; i < 5; ++i)
         frames.push_back(sf::IntRect(i * targetSize.x, 0, targetSize.x, targetSize.y));
-        
-    setTextureRect(frames[0]); // pokaż pierwszą klatkę od razu
+
+    setTextureRect(frames[0]);
 }
 
-void GameObj::animate(int frameNum){
+void GameObj::animate(int frameNum) {
     setTextureRect(frames[frameNum]);
 }
 
@@ -47,11 +41,15 @@ void GameObj::setTextureRect(sf::IntRect rect) {
     sprite.setTextureRect(rect);
 }
 
+// NOWE
+void GameObj::setColor(const sf::Color& color) {
+    sprite.setColor(color);
+}
+
 void GameObj::draw(sf::RenderWindow& window) {
     window.draw(sprite);
 }
 
 void GameObj::setScale(const sf::Vector2f& targetSize) {
-	// forward scale to SFML transform so rendering uses it
-	sprite.setScale(targetSize);
+    sprite.setScale(targetSize);
 }

@@ -5,7 +5,7 @@
 #include "EnemyGunner.hpp" 
 #include "EnemyBoss.hpp" 
 
-// Helpery (bez zmian)
+// Helpery... (bez zmian)
 sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size) {
     static std::random_device rd; static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
@@ -35,25 +35,16 @@ sf::Vector2f GameScreen::getRandomPositionNoCollisionMultiple(const sf::FloatRec
 }
 
 GameScreen::GameScreen() : collisionManager() {
-    // --- INICJALIZACJA PAUZY ---
-    if (!font.loadFromFile("../assets/font.ttf")) {
-        // Obs≥uga b≥Ídu lub fallback, ale zak≥adamy øe plik jest bo uøywasz go w menu
-    }
-
+    if (!font.loadFromFile("../assets/font.ttf")) {}
     pauseText.setFont(font);
     pauseText.setString("PAUSED\nPress Enter to Resume");
     pauseText.setCharacterSize(40);
     pauseText.setFillColor(sf::Color::White);
-
-    // Wyúrodkowanie tekstu (z grubsza)
     sf::FloatRect textRect = pauseText.getLocalBounds();
     pauseText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-    pauseText.setPosition(500.f, 300.f); // årodek ekranu 1000x600
-
-    // PÛ≥przeüroczysta nak≥adka (czarna z alfπ 150)
+    pauseText.setPosition(500.f, 300.f);
     pauseOverlay.setSize(sf::Vector2f(1000.f, 600.f));
     pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
-    // ---------------------------
 
     player = std::make_unique<PlayerBasic>(sf::Vector2f(0.f, 0.f), sf::Vector2f(50.f, 50.f), 100);
     loadLevel("../levels/level_01.json");
@@ -71,6 +62,9 @@ void GameScreen::loadLevel(const std::string& path) {
     background = std::make_unique<Background>(levelData.size);
     background->set(levelData.background);
     player->setPosition(levelData.playerStart);
+
+    // Resetujemy stan gracza po wejúciu na nowy poziom (opcjonalne)
+    // player->setColor(sf::Color::White); 
 
     for (const auto& obs : levelData.obstacles) {
         obstacles.emplace_back(obs.bounds.getPosition(), obs.bounds.getSize(), obs.texture_path);
@@ -99,32 +93,16 @@ void GameScreen::loadLevel(const std::string& path) {
 void GameScreen::handleEvents(sf::RenderWindow& window) {
     sf::Event event;
     while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            window.close();
-        }
-        // --- OBS£UGA KLAWISZY PAUZY ---
+        if (event.type == sf::Event::Closed) window.close();
         else if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Escape) {
-                // Prze≥πcz pauzÍ
-                isPaused = !isPaused;
-            }
-            else if (event.key.code == sf::Keyboard::Enter) {
-                // Jeúli jest zapauzowane, Enter wznawia
-                if (isPaused) {
-                    isPaused = false;
-                }
-            }
+            if (event.key.code == sf::Keyboard::Escape) isPaused = !isPaused;
+            else if (event.key.code == sf::Keyboard::Enter && isPaused) isPaused = false;
         }
-        // ------------------------------
     }
 }
 
 void GameScreen::update(float delta) {
-    // --- LOGIKA PAUZY ---
-    // Jeúli gra jest zapauzowana, wychodzimy z funkcji update natychmiast.
-    // DziÍki temu fizyka, ruch wrogÛw, cooldowny - wszystko "zamarza".
     if (isPaused) return;
-    // --------------------
 
     if (!pendingLevelLoad.empty()) {
         if (pendingLevelLoad == "WIN") { finished = true; isWin = true; }
@@ -155,6 +133,7 @@ void GameScreen::update(float delta) {
     }
 
     for (auto& enemy : enemies_chasers) {
+        // Logika wroga
         enemy->behave(delta, player->getPosition());
         sf::Vector2f ed = enemy->getSpeedVector() * delta;
         collisionManager.tryMove(*enemy, ed);
@@ -164,6 +143,21 @@ void GameScreen::update(float delta) {
         if (bullet) {
             projectileManager.spawn(std::move(bullet));
         }
+
+        // --- KOLIZJA GRACZ -> ENEMY (NOWE) ---
+        // Sprawdzamy czy gracz wpad≥ na wroga
+        if (player->getGlobalBounds().intersects(enemy->getGlobalBounds())) {
+            // Obraøenia rÛwne atakowi wroga (domyúlnie 10)
+            player->takeDamage(enemy->getAttack());
+
+            // Opcjonalnie: odrzut gracza (knockback) - prosty
+            sf::Vector2f recoil = player->getPosition() - enemy->getPosition();
+            // Normalizacja
+            float len = std::sqrt(recoil.x * recoil.x + recoil.y * recoil.y);
+            if (len > 0) recoil /= len;
+            player->move(recoil * 10.f); // Ma≥y odskok, øeby nie staÊ w modelu
+        }
+        // -------------------------------------
     }
 
     projectileManager.update(delta, enemies_chasers, *player, obstacles);
@@ -187,12 +181,10 @@ void GameScreen::render(sf::RenderWindow& window) {
     for (auto& enemy : enemies_chasers) enemy->draw(window);
     projectileManager.render(window);
 
-    // --- RYSOWANIE PAUZY ---
     if (isPaused) {
-        window.draw(pauseOverlay); // PÛ≥przeüroczyste t≥o
-        window.draw(pauseText);    // Napis
+        window.draw(pauseOverlay);
+        window.draw(pauseText);
     }
-    // -----------------------
 
     window.display();
 }
