@@ -26,11 +26,14 @@ void SettingsScreen::handleEvents(sf::RenderWindow& window) {
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             window.close();
-        } else if (
-            event.type == sf::Event::KeyPressed 
-            && event.key.code == sf::Keyboard::Escape) 
-        {
-            finished = true;
+        } else if (event.type == sf::Event::KeyPressed){
+            if (event.key.code == sf::Keyboard::Num1) {
+                setBackgroundMusic(false);
+            } else if (event.key.code == sf::Keyboard::Num2) {
+                setBackgroundMusic(true);
+            } else if (event.key.code == sf::Keyboard::Escape) {
+                finished = true;
+            }
         }
     }
 }
