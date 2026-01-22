@@ -58,7 +58,6 @@ LevelData LevelLoader::loadFromFile(const std::string& path) {
         }
     }
 
-    level.next_level_filename = j["next_level_filename"];
 
     return level;
 }
