@@ -31,6 +31,9 @@ file(COPY ${CMAKE_SOURCE_DIR}/assets
 file(COPY ${CMAKE_SOURCE_DIR}/levels
      DESTINATION ${CMAKE_BINARY_DIR})
 
+file(COPY ${CMAKE_SOURCE_DIR}/data
+     DESTINATION ${CMAKE_BINARY_DIR})
+
 
 include(FetchContent)
 

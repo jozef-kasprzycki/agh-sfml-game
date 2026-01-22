@@ -10,18 +10,29 @@ PlayerBase::PlayerBase(
     inputDirection(0.f, 0.f),
     shootDirection(0.f, 0.f),
     currentCooldown(0.f),
-    invincibilityTimer(0.f)
+    invincibilityTimer(0.f),
+    godMode(false)
 {
     max_speed = 600.f;
     min_speed = 100.f;
 }
 
+void PlayerBase::setGodMode(bool enabled) {
+    godMode = enabled;
+    if (godMode) {
+        setColor(sf::Color(255, 215, 0)); // Z³oty
+    }
+}
+
 void PlayerBase::takeDamage(int dmg) {
+    // Jeœli GodMode (Admin) lub tymczasowa nietykalnoœæ -> brak obra¿eñ
+    if (godMode) return;
     if (invincibilityTimer > 0.f) return;
 
     Entity::takeDamage(dmg);
     std::cout << "\nPlayer hit! HP=" << getHP() << std::endl;
 
+    // Aktywuj klatki nietykalnoœci
     invincibilityTimer = 1.0f;
     setColor(sf::Color(255, 0, 0, 128));
 }
@@ -39,15 +50,23 @@ void PlayerBase::update(float delta) {
 
         if (invincibilityTimer <= 0.f) {
             invincibilityTimer = 0.f;
-            setColor(sf::Color::White);
+            // Przywróæ kolor (jeœli admin to z³oty, jeœli nie to bia³y)
+            if (godMode) setColor(sf::Color(255, 215, 0));
+            else setColor(sf::Color::White);
         }
         else {
+            // Migotanie podczas nietykalnoœci
             if (invincibilityTimer < 0.9f) {
-                setColor(sf::Color(255, 255, 255, 128));
+                // Zachowaj bazowy kolor (z³oty/bia³y) ale dodaj przezroczystoœæ
+                sf::Color c = godMode ? sf::Color(255, 215, 0) : sf::Color::White;
+                c.a = 128;
+                setColor(c);
             }
         }
     }
 }
+
+// --- IMPLEMENTACJE BRAKUJ¥CYCH METOD (To naprawia b³êdy LNK) ---
 
 bool PlayerBase::canShoot() const {
     return currentCooldown <= 0.f;
@@ -73,8 +92,10 @@ bool PlayerBase::isInvincible() const {
     return invincibilityTimer > 0.f;
 }
 
+// ---------------------------------------------------------------
+
 void PlayerBase::applyMovementPhysics(float delta) {
-    // --- 1. FIZYKA RUCHU (Obliczenia wektorów) ---
+    // --- 1. FIZYKA RUCHU ---
 
     // Oœ Y
     if (inputDirection.y < 0.f) { // W
@@ -114,10 +135,7 @@ void PlayerBase::applyMovementPhysics(float delta) {
         speed_vector.x = 0.f;
     }
 
-    // --- 2. LOGIKA ANIMACJI (Kierunek patrzenia) ---
-    // Priorytet ma strzelanie. Jeœli strzelamy, patrzymy tam gdzie celujemy.
-    // Jeœli nie strzelamy, patrzymy tam gdzie idziemy.
-
+    // --- 2. LOGIKA ANIMACJI ---
     int animRow = 0; // Domyœlnie dó³/idle (0)
 
     if (isShooting()) {
@@ -134,9 +152,6 @@ void PlayerBase::applyMovementPhysics(float delta) {
         else if (inputDirection.x < 0.f) animRow = 4; // Lewo
         else if (inputDirection.x > 0.f) animRow = 3; // Prawo
         else {
-            // Jeœli stoi w miejscu i nie strzela -> 0 (Idle)
-            // Mo¿na tu ewentualnie dodaæ zapamiêtywanie ostatniego kierunku,
-            // ale na razie resetujemy do frontu.
             animRow = 0;
         }
     }
