@@ -7,9 +7,9 @@
 #include "EnemyBase.hpp"
 #include "EnemyChaser.hpp"
 #include "LevelData.hpp"
-#include  "Backgorund.hpp"
+#include "Backgorund.hpp"
 #include "ProjectileManager.hpp"
-#include "Door.hpp" // NOWE
+#include "Door.hpp"
 
 #include <vector>
 #include <memory>
@@ -22,10 +22,9 @@ private:
     std::unique_ptr<PlayerBase> player;
     std::unique_ptr<Background> background;
 
-    // Kontenery obiektów
     std::vector<Obstacle> obstacles;
     std::vector<std::unique_ptr<EnemyBase>> enemies_chasers;
-    std::vector<std::unique_ptr<Door>> doors; // NOWE
+    std::vector<std::unique_ptr<Door>> doors;
 
     ProjectileManager projectileManager;
     struct LevelData levelData;
@@ -33,16 +32,19 @@ private:
     bool finished = false;
     bool isWin = false;
 
-    // Zmienna przechowuj¹ca œcie¿kê do nastêpnego poziomu
-    // Jeœli nie pusta -> znaczy ¿e w nastêpnej klatce ³adujemy poziom
+    // --- NOWE ZMIENNE DO PAUZY ---
+    bool isPaused = false;
+    sf::Font font;
+    sf::Text pauseText;
+    sf::RectangleShape pauseOverlay;
+    // -----------------------------
+
     std::string pendingLevelLoad;
 
-    // Helpery
     sf::Vector2f getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size);
     int getRandomObstacleCount();
     sf::Vector2f getRandomPositionNoCollisionMultiple(const sf::FloatRect& playerBounds, const std::vector<Obstacle>& obstacles, const sf::Vector2f& size);
 
-    // NOWE: Metoda ³aduj¹ca poziom
     void loadLevel(const std::string& path);
 
 public:
