@@ -85,7 +85,7 @@
       "y": 275,
       "w": 50,
       "h": 50,
-      "next_level": "WIN"
+      "next_level": "../levels/level_04.json"
     }
   ]
 }

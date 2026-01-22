@@ -1,0 +1,63 @@
+{
+  "name": "Level 4 - Boss Room",
+  "size": {
+    "width": 1000,
+    "height": 600
+  },
+  "background": "../assets/background_1.png",
+
+  "player": {
+    "position": [ 500, 500 ]
+  },
+
+  "obstacles": [
+    {
+      "x": 200,
+      "y": 400,
+      "w": 50,
+      "h": 150,
+      "texture_path": "../assets/obstacle_wall.png"
+    },
+    {
+      "x": 750,
+      "y": 400,
+      "w": 50,
+      "h": 150,
+      "texture_path": "../assets/obstacle_wall.png"
+    },
+    {
+      "x": 200,
+      "y": 50,
+      "w": 50,
+      "h": 150,
+      "texture_path": "../assets/obstacle_wall.png"
+    },
+    {
+      "x": 750,
+      "y": 50,
+      "w": 50,
+      "h": 150,
+      "texture_path": "../assets/obstacle_wall.png"
+    }
+  ],
+
+  "enemies": [
+    {
+      "x": 440,
+      "y": 100,
+      "w": 120,
+      "h": 120,
+      "type": "boss"
+    }
+  ],
+
+  "doors": [
+    {
+      "x": 475,
+      "y": 50,
+      "w": 50,
+      "h": 50,
+      "next_level": "WIN"
+    }
+  ]
+}
