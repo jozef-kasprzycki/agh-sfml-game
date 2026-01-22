@@ -1,14 +1,12 @@
 #include "AuthScreen.hpp"
-#include "GameScreen.hpp" // Potrzebne do ustawienia flagi Admina
+#include "GameScreen.hpp" 
 #include <iostream>
 
 AuthScreen::AuthScreen()
     : userManager("../data/users.json"),
     currentState(AuthState::Menu)
 {
-    if (!font.loadFromFile("../assets/font.ttf")) {
-        // Fallback
-    }
+    if (!font.loadFromFile("../assets/font.ttf")) {}
 
     titleText.setFont(font);
     titleText.setCharacterSize(40);
@@ -44,22 +42,19 @@ void AuthScreen::handleEvents(sf::RenderWindow& window) {
 }
 
 void AuthScreen::handleTextInput(sf::Uint32 unicode) {
-    // Obs³uga Backspace
     if (unicode == 8) {
         if (!currentInput.empty()) currentInput.pop_back();
     }
-    // Obs³uga Enter
     else if (unicode == 13) {
         processEnter();
     }
-    // Obs³uga znaków drukowalnych
     else if (unicode < 128 && unicode > 31) {
         currentInput += static_cast<char>(unicode);
     }
 }
 
 void AuthScreen::processEnter() {
-    errorText.setString(""); // Czyœæ b³êdy
+    errorText.setString("");
 
     switch (currentState) {
     case AuthState::Menu:
@@ -75,22 +70,31 @@ void AuthScreen::processEnter() {
         break;
 
     case AuthState::LoginInputUser:
-        tempUsername = currentInput;
-        currentState = AuthState::LoginInputPass;
-        infoText.setString("LOGIN: Enter Password:");
-        currentInput.clear();
+        // ZMIANA: Sprawdzamy istnienie u¿ytkownika OD RAZU
+        if (userManager.userExists(currentInput)) {
+            // U¿ytkownik istnieje -> przechodzimy do has³a
+            tempUsername = currentInput;
+            currentState = AuthState::LoginInputPass;
+            infoText.setString("LOGIN: Enter Password:");
+            currentInput.clear();
+        }
+        else {
+            // U¿ytkownik nie istnieje -> B£¥D i zostañ w tym samym stanie
+            errorText.setString("User does not exist!");
+            // Opcjonalnie: czyœcimy input lub zostawiamy do poprawy
+            // currentInput.clear(); 
+        }
         break;
 
     case AuthState::LoginInputPass:
         if (userManager.login(tempUsername, currentInput)) {
-            // ZALOGOWANO POMYŒLNIE
-            // Ustawiamy flagê w GameScreen (statyczn¹)
             GameScreen::setAdminMode(tempUsername == "Admin");
             finished = true;
         }
         else {
-            errorText.setString("Invalid username or password! Press Enter to restart.");
-            currentState = AuthState::Menu; // Reset do menu
+            // Skoro login sprawdziliœmy wczeœniej, to tutaj b³¹d musi dotyczyæ has³a
+            errorText.setString("Invalid password! Press Enter to restart.");
+            currentState = AuthState::Menu;
             infoText.setString("1. Create New Character\n2. Login");
         }
         currentInput.clear();
@@ -120,7 +124,6 @@ void AuthScreen::processEnter() {
         if (currentInput == tempPassword) {
             userManager.registerUser(tempUsername, tempPassword);
             errorText.setString("Account created! You can now Login.");
-            // Powrót do menu, ¿eby siê zalogowaæ
             currentState = AuthState::Menu;
             infoText.setString("1. Create New Character\n2. Login");
         }
@@ -135,12 +138,10 @@ void AuthScreen::processEnter() {
 }
 
 void AuthScreen::update(float delta) {
-    // Prosta wizualizacja wpisywanego tekstu
     if (currentState == AuthState::LoginInputPass ||
         currentState == AuthState::RegInputPass ||
         currentState == AuthState::RegConfirmPass)
     {
-        // Maskowanie has³a
         std::string masked(currentInput.length(), '*');
         inputText.setString(masked);
     }
@@ -150,7 +151,7 @@ void AuthScreen::update(float delta) {
 }
 
 void AuthScreen::render(sf::RenderWindow& window) {
-    window.clear(sf::Color(20, 20, 30)); // Ciemne t³o
+    window.clear(sf::Color(20, 20, 30));
     window.draw(titleText);
     window.draw(infoText);
     window.draw(inputText);
@@ -159,5 +160,4 @@ void AuthScreen::render(sf::RenderWindow& window) {
 }
 
 bool AuthScreen::isFinished() const { return finished; }
-// Po udanym logowaniu idziemy do MENU (nie bezpoœrednio do gry)
 std::string AuthScreen::getNextScreen() const { return "menu"; }
