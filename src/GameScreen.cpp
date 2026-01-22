@@ -4,9 +4,17 @@
 #include "Projectile.hpp"
 #include "EnemyGunner.hpp" 
 #include "EnemyBoss.hpp" 
-#include <random> // Do losowania krytyków
+#include <random> 
 
-// Helpery (bez zmian)...
+// --- ZMIENNE STATYCZNE (Dla AuthSystem) ---
+bool GameScreen::isAdminMode = false;
+
+void GameScreen::setAdminMode(bool admin) {
+    isAdminMode = admin;
+}
+// ------------------------------------------
+
+// Helpery
 sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size) {
     static std::random_device rd; static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
@@ -36,6 +44,7 @@ sf::Vector2f GameScreen::getRandomPositionNoCollisionMultiple(const sf::FloatRec
 }
 
 GameScreen::GameScreen() : collisionManager() {
+    // Inicjalizacja pauzy
     if (!font.loadFromFile("../assets/font.ttf")) {}
     pauseText.setFont(font);
     pauseText.setString("PAUSED\nPress Enter to Resume");
@@ -47,11 +56,16 @@ GameScreen::GameScreen() : collisionManager() {
     pauseOverlay.setSize(sf::Vector2f(1000.f, 600.f));
     pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
 
-    // Inicjalizacja managera tekstów (musi byæ po za³adowaniu fonta)
+    // Inicjalizacja managera tekstów
     textManager = std::make_unique<TextManager>(font);
 
-    // Gracz: teraz z nowymi statystykami (crit chance, crit dmg domyœlnie w CombatStats)
+    // Inicjalizacja gracza
     player = std::make_unique<PlayerBasic>(sf::Vector2f(0.f, 0.f), sf::Vector2f(50.f, 50.f), 100);
+
+    // --- APLIKACJA TRYBU BOGA (Jeœli zalogowano jako Admin) ---
+    player->setGodMode(isAdminMode);
+    // ---------------------------------------------------------
+
     loadLevel("../levels/level_01.json");
 }
 
@@ -61,16 +75,19 @@ void GameScreen::loadLevel(const std::string& path) {
     enemies_chasers.clear();
     doors.clear();
     collisionManager = CollisionManager();
-    // Wyczyœæ te¿ teksty przy zmianie poziomu (opcjonalne, ale czystsze)
-    // Ale textManager nie ma metody clear(), a unique_ptr reset() stworzy nowy.
-    // Mo¿na po prostu zostawiæ, same znikn¹.
 
     levelData = LevelLoader::loadFromFile(path);
 
     background = std::make_unique<Background>(levelData.size);
     background->set(levelData.background);
     player->setPosition(levelData.playerStart);
-    player->setColor(sf::Color::White);
+
+    // Reset koloru (chyba ¿e jest adminem, wtedy PlayerBase::setGodMode powinno trzymaæ z³oty,
+    // ale tutaj dla pewnoœci mo¿na zostawiæ lub usun¹æ, zale¿nie jak setGodMode jest zaimplementowane.
+    // Jeœli setGodMode ustawi³o kolor, to ta linijka go nadpisze na bia³y.
+    // Bezpieczniej jest ustawiæ kolor na podstawie trybu:
+    if (isAdminMode) player->setColor(sf::Color(255, 215, 0)); // Z³oty
+    else player->setColor(sf::Color::White);
 
     for (const auto& obs : levelData.obstacles) {
         obstacles.emplace_back(obs.bounds.getPosition(), obs.bounds.getSize(), obs.texture_path);
@@ -139,8 +156,8 @@ void GameScreen::update(float delta) {
             player->getPosition() + sf::Vector2f(20, 20),
             sf::Vector2f(10.f, 10.f),
             dir * stats.projectileSpeed,
-            finalDmg, // Przekazujemy obliczony damage
-            isCrit,   // Przekazujemy flagê krytyka
+            finalDmg,
+            isCrit,
             ProjectileOwner::Player
         ));
         player->resetCooldown();
@@ -166,24 +183,35 @@ void GameScreen::update(float delta) {
         }
 
         if (player->getGlobalBounds().intersects(enemy->getGlobalBounds())) {
+            // Reagujemy tylko, jeœli gracz NIE jest nietykalny
+            // (Admin ma w³¹czony godMode, który w PlayerBase zapobiega otrzymywaniu obra¿eñ,
+            // ale isInvincible odnosi siê do tymczasowej nietykalnoœci po uderzeniu.
+            // Dla pewnoœci sprawdzamy isInvincible() - wewn¹trz takeDamage() jest sprawdzenie godMode).
             if (!player->isInvincible()) {
                 int dmg = enemy->getAttack();
+
+                // Zapamiêtaj HP przed uderzeniem
+                int hpBefore = player->getHP();
+
                 player->takeDamage(dmg);
 
-                // Wyœwietl damage nad graczem
-                textManager->addText(std::to_string(dmg), player->getPosition(), sf::Color::Red);
+                // Jeœli HP spad³o (czyli nie jest Adminem), poka¿ tekst i odrzuæ
+                // (Admin ma godMode w takeDamage, wiêc HP nie spadnie)
+                if (player->getHP() < hpBefore) {
+                    textManager->addText(std::to_string(dmg), player->getPosition(), sf::Color::Red);
 
-                sf::Vector2f recoil = player->getPosition() - enemy->getPosition();
-                float len = std::sqrt(recoil.x * recoil.x + recoil.y * recoil.y);
-                if (len > 0) recoil /= len;
-                sf::Vector2f recoilMove = recoil * 20.f;
-                collisionManager.tryMove(*player, recoilMove);
+                    sf::Vector2f recoil = player->getPosition() - enemy->getPosition();
+                    float len = std::sqrt(recoil.x * recoil.x + recoil.y * recoil.y);
+                    if (len > 0) recoil /= len;
+                    sf::Vector2f recoilMove = recoil * 20.f;
+                    collisionManager.tryMove(*player, recoilMove);
+                }
             }
         }
     }
 
     projectileManager.update(delta, enemies_chasers, *player, obstacles, *textManager);
-    textManager->update(delta); // NOWE: Aktualizuj teksty
+    textManager->update(delta);
 
     enemies_chasers.erase(std::remove_if(enemies_chasers.begin(), enemies_chasers.end(),
         [](const std::unique_ptr<EnemyBase>& e) { return e->getHP() <= 0; }), enemies_chasers.end());
@@ -203,7 +231,7 @@ void GameScreen::render(sf::RenderWindow& window) {
     for (auto& obstacle : obstacles) obstacle.draw(window);
     for (auto& enemy : enemies_chasers) enemy->draw(window);
     projectileManager.render(window);
-    textManager->render(window); // NOWE: Rysuj teksty
+    textManager->render(window);
 
     if (isPaused) {
         window.draw(pauseOverlay);

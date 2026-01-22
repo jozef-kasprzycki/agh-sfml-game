@@ -1,39 +1,39 @@
 #include "ScreenManager.hpp"
-#include "StartScreen.hpp"
 #include "MenuScreen.hpp"
 #include "GameScreen.hpp"
 #include "GameOverScreen.hpp"
 #include "SettingsScreen.hpp"
+#include "AuthScreen.hpp" // Wa¿ne: do³¹czamy nowy ekran
 
-ScreenManager::ScreenManager()
-    : window(sf::VideoMode(1000, 600), "AGH SFML Game")
-{
-    currentScreen = std::make_unique<StartScreen>();
+ScreenManager::ScreenManager() {
+    // Rejestrujemy funkcje tworz¹ce ekrany (lambda)
+    screens["auth"] = []() { return std::make_unique<AuthScreen>(); };
+    screens["menu"] = []() { return std::make_unique<MenuScreen>(); };
+    screens["game"] = []() { return std::make_unique<GameScreen>(); };
+    screens["gameover_win"] = []() { return std::make_unique<GameOverScreen>(true); };
+    screens["gameover_lose"] = []() { return std::make_unique<GameOverScreen>(false); };
+    screens["settings"] = []() { return std::make_unique<SettingsScreen>(); };
+
+    // Na start uruchamiamy ekran logowania
+    currentScreen = screens["auth"]();
 }
 
-void ScreenManager::run() {
+void ScreenManager::run(sf::RenderWindow& window) {
+    sf::Clock clock;
     while (window.isOpen()) {
         float delta = clock.restart().asSeconds();
+
         currentScreen->handleEvents(window);
         currentScreen->update(delta);
         currentScreen->render(window);
 
         if (currentScreen->isFinished()) {
             std::string next = currentScreen->getNextScreen();
-            if (next == "menu") {
-                currentScreen = std::make_unique<MenuScreen>();
-            } else if (next == "game") {
-                currentScreen = std::make_unique<GameScreen>();
-            } else if (next == "gameover_win") {
-                currentScreen = std::make_unique<GameOverScreen>(true);
-            } else if (next == "gameover_lose") {
-                currentScreen = std::make_unique<GameOverScreen>(false);
-            } else if (next == "start") {
-                currentScreen = std::make_unique<StartScreen>();
-            } else if (next == "settings") {
-                currentScreen = std::make_unique<SettingsScreen>();
+
+            // Sprawdzamy czy mamy taki ekran w mapie
+            if (screens.find(next) != screens.end()) {
+                currentScreen = screens[next](); // Tworzymy now¹ instancjê ekranu
             }
-            // Add more if needed
         }
     }
 }

@@ -5,9 +5,10 @@
 class PlayerBase : public Entity {
 protected:
     float currentCooldown;
-
-    // NOWE: Timer nietykalnoœci
     float invincibilityTimer;
+
+    // NOWE: Tryb boga (Admin)
+    bool godMode = false;
 
     sf::Vector2f inputDirection;
     sf::Vector2f shootDirection;
@@ -26,7 +27,6 @@ public:
 
     void update(float delta) override;
 
-    // Nadpisujemy, aby uwzglêdniaæ nietykalnoœæ
     void takeDamage(int dmg) override;
 
     bool isShooting() const;
@@ -35,6 +35,8 @@ public:
     void resetCooldown();
     float getProjectileSpeed() const;
 
-    // Helper
     bool isInvincible() const;
+
+    // NOWE
+    void setGodMode(bool enabled); //Nazwa: Admin Has³o: Admin
 };

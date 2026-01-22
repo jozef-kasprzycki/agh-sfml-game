@@ -53,8 +53,14 @@ private:
 
     void loadLevel(const std::string& path);
 
+    static bool isAdminMode;
+
 public:
     GameScreen();
+
+    // Metoda statyczna do ustawiania trybu (wo³ana z AuthScreen)
+    static void setAdminMode(bool admin);
+
     void handleEvents(sf::RenderWindow& window) override;
     void update(float delta) override;
     void render(sf::RenderWindow& window) override;
