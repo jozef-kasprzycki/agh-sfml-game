@@ -48,13 +48,13 @@ GameScreen::GameScreen() : collisionManager() {
     if (!font.loadFromFile("../assets/font.ttf")) {}
     pauseText.setFont(font);
 
-    // ZMIANA: Dodano instrukcjê wyjœcia spacj¹
+    // ZMIANA: Dodano instrukcjï¿½ wyjï¿½cia spacjï¿½
     pauseText.setString("PAUSED\nPress Enter to Resume\nPress Space to Quit");
 
     pauseText.setCharacterSize(40);
     pauseText.setFillColor(sf::Color::White);
 
-    // Centrowanie tekstu (dostosowane do d³u¿szego napisu)
+    // Centrowanie tekstu (dostosowane do dï¿½uï¿½szego napisu)
     sf::FloatRect textRect = pauseText.getLocalBounds();
     pauseText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     pauseText.setPosition(500.f, 300.f);
@@ -119,14 +119,14 @@ void GameScreen::handleEvents(sf::RenderWindow& window) {
                 isPaused = !isPaused;
             }
             else if (isPaused) {
-                // Obs³uga klawiszy w trakcie pauzy
+                // Obsï¿½uga klawiszy w trakcie pauzy
                 if (event.key.code == sf::Keyboard::Enter) {
                     isPaused = false; // Wznowienie
                 }
                 else if (event.key.code == sf::Keyboard::Space) {
-                    // ZMIANA: Wyjœcie do menu
+                    // ZMIANA: Wyjï¿½cie do menu
                     nextScreenID = "menu"; // Ustawiamy cel
-                    finished = true;       // Koñczymy ten ekran
+                    finished = true;       // Koï¿½czymy ten ekran
                 }
             }
         }
@@ -143,7 +143,8 @@ void GameScreen::update(float delta) {
     }
 
     player->update(delta);
-    collisionManager.tryMove(*player, player->getSpeedVector() * delta);
+    sf::Vector2f movement = player->getSpeedVector() * delta;
+    collisionManager.tryMove(*player, movement);
 
     if (player->isShooting() && player->canShoot()) {
         sf::Vector2f dir = player->getShootDirection();
@@ -241,7 +242,7 @@ void GameScreen::render(sf::RenderWindow& window) {
 
 bool GameScreen::isFinished() const { return finished; }
 
-// ZMIANA: Zwraca rêcznie ustawiony ekran (menu) lub standardowy (win/lose)
+// ZMIANA: Zwraca rï¿½cznie ustawiony ekran (menu) lub standardowy (win/lose)
 std::string GameScreen::getNextScreen() const {
     if (!nextScreenID.empty()) {
         return nextScreenID;
