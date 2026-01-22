@@ -10,24 +10,19 @@ PlayerBase::PlayerBase(
     inputDirection(0.f, 0.f),
     shootDirection(0.f, 0.f),
     currentCooldown(0.f),
-    invincibilityTimer(0.f) // Startujemy bez nietykalnoœci
+    invincibilityTimer(0.f)
 {
     max_speed = 600.f;
     min_speed = 100.f;
 }
 
 void PlayerBase::takeDamage(int dmg) {
-    // Jeœli jest nietykalny, ignorujemy obra¿enia
     if (invincibilityTimer > 0.f) return;
 
-    // Jeœli nie, przyjmujemy damage
     Entity::takeDamage(dmg);
     std::cout << "\nPlayer hit! HP=" << getHP() << std::endl;
 
-    // Aktywujemy nietykalnoœæ na 1.0 sekundy
     invincibilityTimer = 1.0f;
-
-    // Wizualny efekt uderzenia (czerwony)
     setColor(sf::Color(255, 0, 0, 128));
 }
 
@@ -39,27 +34,19 @@ void PlayerBase::update(float delta) {
         currentCooldown -= delta;
     }
 
-    // Obs³uga nietykalnoœci
     if (invincibilityTimer > 0.f) {
         invincibilityTimer -= delta;
 
-        // Jeœli czas siê skoñczy³
         if (invincibilityTimer <= 0.f) {
             invincibilityTimer = 0.f;
-            setColor(sf::Color::White); // Wróæ do normy
+            setColor(sf::Color::White);
         }
         else {
-            // Migotanie lub pó³przeŸroczystoœæ (tutaj: pó³przeŸroczystoœæ)
-            // Jeœli min¹³ moment "czerwonego uderzenia" (np. 0.1s), ustaw na bia³y-przeŸroczysty
             if (invincibilityTimer < 0.9f) {
                 setColor(sf::Color(255, 255, 255, 128));
             }
         }
     }
-}
-
-bool PlayerBase::isInvincible() const {
-    return invincibilityTimer > 0.f;
 }
 
 bool PlayerBase::canShoot() const {
@@ -82,29 +69,77 @@ sf::Vector2f PlayerBase::getShootDirection() const {
     return shootDirection;
 }
 
-void PlayerBase::applyMovementPhysics(float delta) {
-    // Bez zmian...
-    if (inputDirection.y < 0.f) {
-        if (speed_vector.y > -max_speed) speed_vector.y -= max_speed * delta;
-        animate(1);
-    }
-    else if (inputDirection.y > 0.f) {
-        if (speed_vector.y < max_speed) speed_vector.y += max_speed * delta;
-        animate(2);
-    }
-    else if (speed_vector.y > min_speed) { speed_vector.y -= max_speed * delta; }
-    else if (speed_vector.y < -min_speed) { speed_vector.y += max_speed * delta; }
-    else { speed_vector.y = 0.f; animate(0); }
+bool PlayerBase::isInvincible() const {
+    return invincibilityTimer > 0.f;
+}
 
-    if (inputDirection.x < 0.f) {
-        if (speed_vector.x > -max_speed) speed_vector.x -= max_speed * delta;
-        animate(4);
+void PlayerBase::applyMovementPhysics(float delta) {
+    // --- 1. FIZYKA RUCHU (Obliczenia wektorów) ---
+
+    // Oœ Y
+    if (inputDirection.y < 0.f) { // W
+        if (speed_vector.y > -max_speed)
+            speed_vector.y -= max_speed * delta;
     }
-    else if (inputDirection.x > 0.f) {
-        if (speed_vector.x < max_speed) speed_vector.x += max_speed * delta;
-        animate(3);
+    else if (inputDirection.y > 0.f) { // S
+        if (speed_vector.y < max_speed)
+            speed_vector.y += max_speed * delta;
     }
-    else if (speed_vector.x > min_speed) { speed_vector.x -= max_speed * delta; }
-    else if (speed_vector.x < -min_speed) { speed_vector.x += max_speed * delta; }
-    else { speed_vector.x = 0.f; }
+    else if (speed_vector.y > min_speed) {
+        speed_vector.y -= max_speed * delta;
+    }
+    else if (speed_vector.y < -min_speed) {
+        speed_vector.y += max_speed * delta;
+    }
+    else {
+        speed_vector.y = 0.f;
+    }
+
+    // Oœ X
+    if (inputDirection.x < 0.f) { // A
+        if (speed_vector.x > -max_speed)
+            speed_vector.x -= max_speed * delta;
+    }
+    else if (inputDirection.x > 0.f) { // D
+        if (speed_vector.x < max_speed)
+            speed_vector.x += max_speed * delta;
+    }
+    else if (speed_vector.x > min_speed) {
+        speed_vector.x -= max_speed * delta;
+    }
+    else if (speed_vector.x < -min_speed) {
+        speed_vector.x += max_speed * delta;
+    }
+    else {
+        speed_vector.x = 0.f;
+    }
+
+    // --- 2. LOGIKA ANIMACJI (Kierunek patrzenia) ---
+    // Priorytet ma strzelanie. Jeœli strzelamy, patrzymy tam gdzie celujemy.
+    // Jeœli nie strzelamy, patrzymy tam gdzie idziemy.
+
+    int animRow = 0; // Domyœlnie dó³/idle (0)
+
+    if (isShooting()) {
+        // Priorytet: Strzelanie
+        if (shootDirection.y < -0.1f)      animRow = 1; // Góra
+        else if (shootDirection.y > 0.1f)  animRow = 2; // Dó³
+        else if (shootDirection.x < -0.1f) animRow = 4; // Lewo
+        else if (shootDirection.x > 0.1f)  animRow = 3; // Prawo
+    }
+    else {
+        // Fallback: Ruch
+        if (inputDirection.y < 0.f)      animRow = 1; // Góra
+        else if (inputDirection.y > 0.f) animRow = 2; // Dó³
+        else if (inputDirection.x < 0.f) animRow = 4; // Lewo
+        else if (inputDirection.x > 0.f) animRow = 3; // Prawo
+        else {
+            // Jeœli stoi w miejscu i nie strzela -> 0 (Idle)
+            // Mo¿na tu ewentualnie dodaæ zapamiêtywanie ostatniego kierunku,
+            // ale na razie resetujemy do frontu.
+            animRow = 0;
+        }
+    }
+
+    animate(animRow);
 }
