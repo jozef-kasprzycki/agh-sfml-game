@@ -2,9 +2,10 @@
 #include "LevelLoader.hpp"
 #include <iostream>
 #include "Projectile.hpp"
-#include "EnemyGunner.hpp" // NOWE
+#include "EnemyGunner.hpp" 
+#include "EnemyBoss.hpp" 
 
-// Helpery... (bez zmian)
+// Helpery
 sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size) {
     static std::random_device rd; static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
@@ -13,7 +14,9 @@ sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRec
     do { candidate.left = distX(gen); candidate.top = distY(gen); candidate.width = size.x; candidate.height = size.y; } while (candidate.intersects(forbidden));
     return { candidate.left, candidate.top };
 }
+
 int GameScreen::getRandomObstacleCount() { return 3; }
+
 sf::Vector2f GameScreen::getRandomPositionNoCollisionMultiple(const sf::FloatRect& playerBounds, const std::vector<Obstacle>& obstacles, const sf::Vector2f& size) {
     static std::random_device rd; static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
@@ -61,8 +64,11 @@ void GameScreen::loadLevel(const std::string& path) {
         if (enemy.type == "chaser") {
             enemies_chasers.push_back(std::make_unique<EnemyChaser>(enemy.bounds.getPosition(), enemy.bounds.getSize()));
         }
-        else if (enemy.type == "gunner") { // Obs³uga Gunnera
+        else if (enemy.type == "gunner") {
             enemies_chasers.push_back(std::make_unique<EnemyGunner>(enemy.bounds.getPosition(), enemy.bounds.getSize()));
+        } // <--- TUTAJ BRAKOWA£O NAWIASU!
+        else if (enemy.type == "boss") {
+            enemies_chasers.push_back(std::make_unique<EnemyBoss>(enemy.bounds.getPosition(), enemy.bounds.getSize()));
         }
         else if (enemy.type == "bomber") {
             std::cout << "Spawn bomber (placeholder)\n";
@@ -108,7 +114,6 @@ void GameScreen::update(float delta) {
         collisionManager.tryMove(*enemy, ed);
         enemy->update(delta);
 
-        // NOWE: Próba strza³u przez wroga
         auto bullet = enemy->tryShoot(delta, player->getPosition());
         if (bullet) {
             projectileManager.spawn(std::move(bullet));
