@@ -4,8 +4,10 @@
 
 class PlayerBase : public Entity {
 protected:
-    // Licznik cooldownu (fireRate bierzemy z Entity::combatStats)
     float currentCooldown;
+
+    // NOWE: Timer nietykalnoœci
+    float invincibilityTimer;
 
     sf::Vector2f inputDirection;
     sf::Vector2f shootDirection;
@@ -23,13 +25,16 @@ public:
     virtual ~PlayerBase() = default;
 
     void update(float delta) override;
+
+    // Nadpisujemy, aby uwzglêdniaæ nietykalnoœæ
     void takeDamage(int dmg) override;
 
     bool isShooting() const;
     sf::Vector2f getShootDirection() const;
-
-    // Logika strzelania
     bool canShoot() const;
     void resetCooldown();
     float getProjectileSpeed() const;
+
+    // Helper
+    bool isInvincible() const;
 };
