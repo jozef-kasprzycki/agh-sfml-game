@@ -1,12 +1,14 @@
+#include <iostream>
 #include "ScreenManager.hpp"
 #include "MenuScreen.hpp"
 #include "GameScreen.hpp"
 #include "GameOverScreen.hpp"
 #include "SettingsScreen.hpp"
-#include "AuthScreen.hpp" // Wa¿ne: do³¹czamy nowy ekran
+#include "AuthScreen.hpp" // Waï¿½ne: doï¿½ï¿½czamy nowy ekran
+#include "SoundManager.hpp"
 
 ScreenManager::ScreenManager() {
-    // Rejestrujemy funkcje tworz¹ce ekrany (lambda)
+    // Rejestrujemy funkcje tworzï¿½ce ekrany (lambda)
     screens["auth"] = []() { return std::make_unique<AuthScreen>(); };
     screens["menu"] = []() { return std::make_unique<MenuScreen>(); };
     screens["game"] = []() { return std::make_unique<GameScreen>(); };
@@ -20,6 +22,11 @@ ScreenManager::ScreenManager() {
 
 void ScreenManager::run(sf::RenderWindow& window) {
     sf::Clock clock;
+    if (!soundManager.loadBackgroundMusic("../assets/nowa_era.mp3"))
+        std::cerr << "Failed to load background music." << std::endl;
+
+    soundManager.resumeBackgroundMusic();
+
     while (window.isOpen()) {
         float delta = clock.restart().asSeconds();
 
@@ -32,7 +39,7 @@ void ScreenManager::run(sf::RenderWindow& window) {
 
             // Sprawdzamy czy mamy taki ekran w mapie
             if (screens.find(next) != screens.end()) {
-                currentScreen = screens[next](); // Tworzymy now¹ instancjê ekranu
+                currentScreen = screens[next](); // Tworzymy nowï¿½ instancjï¿½ ekranu
             }
         }
     }
