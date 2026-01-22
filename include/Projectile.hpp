@@ -9,6 +9,7 @@ enum class ProjectileOwner {
 class Projectile : public Movable {
 protected:
     int damage;
+    bool isCritical; // NOWE
     ProjectileOwner owner;
     float lifetime;
 
@@ -18,13 +19,13 @@ public:
         sf::Vector2f size,
         sf::Vector2f velocity,
         int damage,
+        bool isCritical, // NOWE
         ProjectileOwner owner
     );
 
-    // Zwyk³a metoda, bez override, bo Movable nie ma virtual update
     void update(float delta);
-
     int getDamage() const;
+    bool getIsCritical() const; // NOWE
     ProjectileOwner getOwner() const;
     bool isExpired() const;
 };

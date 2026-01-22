@@ -5,7 +5,8 @@
 #include "Projectile.hpp"
 #include "EnemyBase.hpp"
 #include "PlayerBase.hpp"
-#include "Obstacle.hpp" // Dodano include
+#include "Obstacle.hpp"
+#include "TextManager.hpp" // NOWE
 
 class ProjectileManager {
 private:
@@ -14,12 +15,12 @@ private:
 public:
     void spawn(std::unique_ptr<Projectile>);
 
-    // Zaktualizowana sygnatura - dodano obstacles
     void update(
         float delta,
         std::vector<std::unique_ptr<EnemyBase>>& enemies,
         PlayerBase& player,
-        const std::vector<Obstacle>& obstacles
+        const std::vector<Obstacle>& obstacles,
+        TextManager& textManager // NOWE
     );
 
     void render(sf::RenderWindow& window);

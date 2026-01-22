@@ -16,11 +16,14 @@ EnemyGunner::EnemyGunner(sf::Vector2f position, sf::Vector2f size)
     max_speed = 100.f;
     min_speed = 100.f; // Chcemy sta³¹ prêdkoœæ
 
-    // U¿yj innej tekstury (lub tej samej co player tymczasowo, lub enemy.png z innym kolorem w przysz³oœci)
-    // Tutaj u¿ywam enemy.png
-    setTexture(TextureManager::get("../assets/enemy.png"));
+    try {
+        setTexture(TextureManager::get("../assets/enemy.png"));
+    }
+    catch (...) {
+        // Fallback w razie braku tekstury
+    }
 
-    // Gunner od razu wchodzi w stan Wander (i nigdy go nie zmienia na Chase)
+    // Gunner od razu wchodzi w stan Wander
     stateMachine.changeState(*this, std::make_unique<EnemyGunnerWanderState>());
 }
 
@@ -41,6 +44,7 @@ std::unique_ptr<Projectile> EnemyGunner::tryShoot(float delta, const sf::Vector2
             sf::Vector2f(10.f, 10.f),
             dir * combatStats.projectileSpeed,
             combatStats.attack,
+            false, // isCritical = false (wrogowie na razie nie krytykuj¹)
             ProjectileOwner::Enemy
         );
     }
