@@ -271,7 +271,7 @@ void GameScreen::render(sf::RenderWindow& window) {
     window.clear();
     background->draw(window);
 
-    if (enemies_chasers.empty()) {
+    if (!enemies_chasers.empty()) {
         for (const auto& door : doors) door->draw(window);
     }
 

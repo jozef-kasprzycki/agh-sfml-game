@@ -1,15 +1,24 @@
 #include <SFML/Graphics.hpp>
 #include "SettingsScreen.hpp"
 #include "TextureManager.hpp"
+#include <iostream>
 
 SettingsScreen::SettingsScreen() {
     backgroundTexture = TextureManager::get("../assets/settings_bg.png");
     backgroundSprite.setTexture(backgroundTexture);
 
+    if (!font.loadFromFile("../assets/font.ttf")) 
+        std::cerr << "Blad ladowania czcionki!\n";
     text.setFont(font);
-    text.setString("Settings");
+    text.setString("1 - wylacz muzyke\n2 - wlacz muzyke\nEsc - powrot do menu");
     text.setCharacterSize(30);
-    text.setPosition(350, 250);
+    text.setFillColor(sf::Color::White);
+    text.setOutlineColor(sf::Color::Black);
+    text.setOrigin(
+        text.getGlobalBounds().width / 2,
+        text.getGlobalBounds().height / 2
+    );
+    text.setPosition(500, 300);
 }
 
 void SettingsScreen::handleEvents(sf::RenderWindow& window) {
