@@ -1,5 +1,6 @@
 #include "ProjectileManager.hpp"
 #include <algorithm>
+#include <string>
 
 void ProjectileManager::spawn(std::unique_ptr<Projectile> p) {
     projectiles.push_back(std::move(p));
@@ -9,32 +10,46 @@ void ProjectileManager::update(
     float delta,
     std::vector<std::unique_ptr<EnemyBase>>& enemies,
     PlayerBase& player,
-    const std::vector<Obstacle>& obstacles
+    const std::vector<Obstacle>& obstacles,
+    TextManager& textManager // NOWE
 ) {
-    // 1. Aktualizacja i kolizje podstawowe (œciany, trafienia w postacie)
     for (auto& p : projectiles) {
         p->update(delta);
         bool hit = false;
 
+        // 1. Kolizja: Pocisk Gracza -> Przeciwnik
         if (p->getOwner() == ProjectileOwner::Player) {
-            // Pocisk gracza -> wrogowie
             for (auto& enemy : enemies) {
                 if (enemy->getGlobalBounds().intersects(p->getGlobalBounds())) {
-                    enemy->takeDamage(p->getDamage());
+                    int dmg = p->getDamage();
+                    bool crit = p->getIsCritical();
+
+                    enemy->takeDamage(dmg);
+
+                    // SPAWN CYFERKI
+                    sf::Color color = crit ? sf::Color::Yellow : sf::Color::White;
+                    std::string txt = std::to_string(dmg) + (crit ? "!" : "");
+                    textManager.addText(txt, enemy->getPosition(), color);
+
                     hit = true;
                     break;
                 }
             }
         }
         else {
-            // Pocisk wroga -> gracz
+            // Pocisk wroga -> Gracz
             if (p->getGlobalBounds().intersects(player.getGlobalBounds())) {
-                player.takeDamage(p->getDamage());
+                if (!player.isInvincible()) {
+                    int dmg = p->getDamage();
+                    player.takeDamage(dmg);
+
+                    // Cyferka nad graczem (czerwona)
+                    textManager.addText(std::to_string(dmg), player.getPosition(), sf::Color::Red);
+                }
                 hit = true;
             }
         }
 
-        // Kolizja ze œcianami
         if (!hit) {
             for (const auto& obs : obstacles) {
                 if (p->getGlobalBounds().intersects(obs.getGlobalBounds())) {
@@ -45,33 +60,31 @@ void ProjectileManager::update(
         }
 
         if (hit) {
-            p->setPosition({ -1000.f, -1000.f }); // Oznacz do usuniêcia
+            p->setPosition({ -1000.f, -1000.f });
         }
     }
 
-    // 2. Neutralizacja pocisków (Player Bullet vs Enemy Bullet)
-    // N^2 complexity, ale przy ma³ej liczbie pocisków jest OK
+    // Neutralizacja pocisków
     for (size_t i = 0; i < projectiles.size(); ++i) {
-        if (projectiles[i]->getPosition().x < -900.f) continue; // Ju¿ usuniêty
-
+        if (projectiles[i]->getPosition().x < -900.f) continue;
         for (size_t j = i + 1; j < projectiles.size(); ++j) {
-            if (projectiles[j]->getPosition().x < -900.f) continue; // Ju¿ usuniêty
+            if (projectiles[j]->getPosition().x < -900.f) continue;
 
             auto& p1 = projectiles[i];
             auto& p2 = projectiles[j];
 
-            // Sprawdzamy czy to wrogie sobie pociski
             if (p1->getOwner() != p2->getOwner()) {
                 if (p1->getGlobalBounds().intersects(p2->getGlobalBounds())) {
-                    // Zderzenie pocisków -> oba znikaj¹
                     p1->setPosition({ -1000.f, -1000.f });
                     p2->setPosition({ -1000.f, -1000.f });
+
+                    // Efekt zderzenia pocisków? (opcjonalnie tekst "Clash")
+                    // textManager.addText("x", p1->getPosition(), sf::Color::Cyan);
                 }
             }
         }
     }
 
-    // 3. Usuwanie
     projectiles.erase(
         std::remove_if(
             projectiles.begin(),

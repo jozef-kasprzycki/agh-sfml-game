@@ -10,6 +10,7 @@
 #include "Backgorund.hpp"
 #include "ProjectileManager.hpp"
 #include "Door.hpp"
+#include "TextManager.hpp" // NOWE
 
 #include <vector>
 #include <memory>
@@ -27,17 +28,22 @@ private:
     std::vector<std::unique_ptr<Door>> doors;
 
     ProjectileManager projectileManager;
+
+    // NOWE
+    // TextManager musi byæ zainicjalizowany PO za³adowaniu czcionki,
+    // wiêc wskaŸnik lub std::optional, albo po prostu inicjalizacja w ciele konstruktora
+    // U¿yjmy unique_ptr dla bezpieczeñstwa kolejnoœci inicjalizacji
+    std::unique_ptr<TextManager> textManager;
+
     struct LevelData levelData;
 
     bool finished = false;
     bool isWin = false;
-
-    // --- NOWE ZMIENNE DO PAUZY ---
     bool isPaused = false;
+
     sf::Font font;
     sf::Text pauseText;
     sf::RectangleShape pauseOverlay;
-    // -----------------------------
 
     std::string pendingLevelLoad;
 

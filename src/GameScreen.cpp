@@ -4,8 +4,9 @@
 #include "Projectile.hpp"
 #include "EnemyGunner.hpp" 
 #include "EnemyBoss.hpp" 
+#include <random> // Do losowania krytyków
 
-// Helpery
+// Helpery (bez zmian)...
 sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size) {
     static std::random_device rd; static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
@@ -46,6 +47,10 @@ GameScreen::GameScreen() : collisionManager() {
     pauseOverlay.setSize(sf::Vector2f(1000.f, 600.f));
     pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
 
+    // Inicjalizacja managera tekstów (musi byæ po za³adowaniu fonta)
+    textManager = std::make_unique<TextManager>(font);
+
+    // Gracz: teraz z nowymi statystykami (crit chance, crit dmg domyœlnie w CombatStats)
     player = std::make_unique<PlayerBasic>(sf::Vector2f(0.f, 0.f), sf::Vector2f(50.f, 50.f), 100);
     loadLevel("../levels/level_01.json");
 }
@@ -56,14 +61,15 @@ void GameScreen::loadLevel(const std::string& path) {
     enemies_chasers.clear();
     doors.clear();
     collisionManager = CollisionManager();
+    // Wyczyœæ te¿ teksty przy zmianie poziomu (opcjonalne, ale czystsze)
+    // Ale textManager nie ma metody clear(), a unique_ptr reset() stworzy nowy.
+    // Mo¿na po prostu zostawiæ, same znikn¹.
 
     levelData = LevelLoader::loadFromFile(path);
 
     background = std::make_unique<Background>(levelData.size);
     background->set(levelData.background);
     player->setPosition(levelData.playerStart);
-
-    // Opcjonalnie: reset koloru przy zmianie poziomu
     player->setColor(sf::Color::White);
 
     for (const auto& obs : levelData.obstacles) {
@@ -115,11 +121,27 @@ void GameScreen::update(float delta) {
 
     if (player->isShooting() && player->canShoot()) {
         sf::Vector2f dir = player->getShootDirection();
+
+        // --- OBLICZANIE KRYTYKA ---
+        const auto& stats = player->getStats();
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> chance(0.0f, 1.0f);
+
+        bool isCrit = chance(gen) < stats.critChance;
+        int finalDmg = stats.attack;
+        if (isCrit) {
+            finalDmg = static_cast<int>(stats.attack * stats.critDamage);
+        }
+        // --------------------------
+
         projectileManager.spawn(std::make_unique<Projectile>(
             player->getPosition() + sf::Vector2f(20, 20),
             sf::Vector2f(10.f, 10.f),
-            dir * player->getProjectileSpeed(),
-            25, ProjectileOwner::Player
+            dir * stats.projectileSpeed,
+            finalDmg, // Przekazujemy obliczony damage
+            isCrit,   // Przekazujemy flagê krytyka
+            ProjectileOwner::Player
         ));
         player->resetCooldown();
     }
@@ -143,31 +165,25 @@ void GameScreen::update(float delta) {
             projectileManager.spawn(std::move(bullet));
         }
 
-        // --- KOLIZJA GRACZ -> ENEMY (POPRAWIONA) ---
-        // Sprawdzamy czy gracz wpad³ na wroga
         if (player->getGlobalBounds().intersects(enemy->getGlobalBounds())) {
-
-            // Reagujemy tylko, jeœli gracz NIE jest nietykalny
             if (!player->isInvincible()) {
+                int dmg = enemy->getAttack();
+                player->takeDamage(dmg);
 
-                // 1. Zadaj obra¿enia
-                player->takeDamage(enemy->getAttack());
+                // Wyœwietl damage nad graczem
+                textManager->addText(std::to_string(dmg), player->getPosition(), sf::Color::Red);
 
-                // 2. Odrzut (Knockback)
                 sf::Vector2f recoil = player->getPosition() - enemy->getPosition();
                 float len = std::sqrt(recoil.x * recoil.x + recoil.y * recoil.y);
                 if (len > 0) recoil /= len;
-
-                // Zamiast player->move(), u¿ywamy collisionManager!
-                // Dziêki temu odrzut nie wyrzuci nas za œcianê.
                 sf::Vector2f recoilMove = recoil * 20.f;
                 collisionManager.tryMove(*player, recoilMove);
             }
         }
-        // -------------------------------------------
     }
 
-    projectileManager.update(delta, enemies_chasers, *player, obstacles);
+    projectileManager.update(delta, enemies_chasers, *player, obstacles, *textManager);
+    textManager->update(delta); // NOWE: Aktualizuj teksty
 
     enemies_chasers.erase(std::remove_if(enemies_chasers.begin(), enemies_chasers.end(),
         [](const std::unique_ptr<EnemyBase>& e) { return e->getHP() <= 0; }), enemies_chasers.end());
@@ -187,6 +203,7 @@ void GameScreen::render(sf::RenderWindow& window) {
     for (auto& obstacle : obstacles) obstacle.draw(window);
     for (auto& enemy : enemies_chasers) enemy->draw(window);
     projectileManager.render(window);
+    textManager->render(window); // NOWE: Rysuj teksty
 
     if (isPaused) {
         window.draw(pauseOverlay);
