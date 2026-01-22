@@ -5,13 +5,15 @@
 #include <map>
 #include <string>
 #include <functional>
+#include "SoundManager.hpp"
 
 class ScreenManager {
 private:
     std::unique_ptr<Screen> currentScreen;
 
-    // Tego brakowa³o - mapa, która przechowuje instrukcje jak tworzyæ dany ekran
+    // Tego brakowaï¿½o - mapa, ktï¿½ra przechowuje instrukcje jak tworzyï¿½ dany ekran
     std::map<std::string, std::function<std::unique_ptr<Screen>()>> screens;
+    SoundManager soundManager;
 
 public:
     ScreenManager();
