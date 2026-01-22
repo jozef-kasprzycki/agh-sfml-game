@@ -5,7 +5,8 @@
 
 class SettingsScreen : public Screen {
 private:
-    // ...
+    sf::Font font;
+    sf::Text text;
     bool finished = false;
     std::string next_screen = "menu";
 public:

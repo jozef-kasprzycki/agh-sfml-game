@@ -1,3 +1,4 @@
+#include <SFML/Graphics.hpp>
 #include "SettingsScreen.hpp"
 #include "TextureManager.hpp"
 
@@ -5,7 +6,10 @@ SettingsScreen::SettingsScreen() {
     backgroundTexture = TextureManager::get("../assets/settings_bg.png");
     backgroundSprite.setTexture(backgroundTexture);
 
-    // Settings staff
+    text.setFont(font);
+    text.setString("Settings");
+    text.setCharacterSize(30);
+    text.setPosition(350, 250);
 }
 
 void SettingsScreen::handleEvents(sf::RenderWindow& window) {
@@ -13,7 +17,9 @@ void SettingsScreen::handleEvents(sf::RenderWindow& window) {
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             window.close();
-        } else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) 
+        } else if (
+            event.type == sf::Event::KeyPressed 
+            && event.key.code == sf::Keyboard::Escape) 
         {
             finished = true;
         }
@@ -27,6 +33,7 @@ void SettingsScreen::update(float delta) {
 void SettingsScreen::render(sf::RenderWindow& window) {
     window.clear();
     window.draw(backgroundSprite);
+    window.draw(text);
     window.display();
 }
 

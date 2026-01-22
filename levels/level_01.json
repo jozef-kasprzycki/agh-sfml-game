@@ -17,5 +17,7 @@
   "enemies": [
     { "x": 300, "y": 400, "w": 50, "h": 50, "type": "chaser" },
     { "x": 500, "y": 145, "w": 50, "h": 50, "type": "bomber" }
-  ]
+  ],
+
+  "next_level_filename" : "../levels/level_02.json"
 }

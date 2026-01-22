@@ -29,4 +29,5 @@ struct LevelData {
     sf::Vector2f playerStart;
     std::vector<struct ObstacleData> obstacles;
     std::vector<struct EnemyData> enemies;
+    std::string next_level_filename;
 };
