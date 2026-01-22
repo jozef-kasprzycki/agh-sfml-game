@@ -6,13 +6,13 @@
 #include "EnemyBoss.hpp" 
 #include <random> 
 
-// --- ZMIENNE STATYCZNE (Dla AuthSystem) ---
+// --- ZMIENNE STATYCZNE ---
 bool GameScreen::isAdminMode = false;
 
 void GameScreen::setAdminMode(bool admin) {
     isAdminMode = admin;
 }
-// ------------------------------------------
+// -------------------------
 
 // Helpery
 sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size) {
@@ -47,24 +47,25 @@ GameScreen::GameScreen() : collisionManager() {
     // Inicjalizacja pauzy
     if (!font.loadFromFile("../assets/font.ttf")) {}
     pauseText.setFont(font);
-    pauseText.setString("PAUSED\nPress Enter to Resume");
+
+    // ZMIANA: Dodano instrukcjê wyjœcia spacj¹
+    pauseText.setString("PAUSED\nPress Enter to Resume\nPress Space to Quit");
+
     pauseText.setCharacterSize(40);
     pauseText.setFillColor(sf::Color::White);
+
+    // Centrowanie tekstu (dostosowane do d³u¿szego napisu)
     sf::FloatRect textRect = pauseText.getLocalBounds();
     pauseText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
     pauseText.setPosition(500.f, 300.f);
+
     pauseOverlay.setSize(sf::Vector2f(1000.f, 600.f));
     pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
 
-    // Inicjalizacja managera tekstów
     textManager = std::make_unique<TextManager>(font);
 
-    // Inicjalizacja gracza
     player = std::make_unique<PlayerBasic>(sf::Vector2f(0.f, 0.f), sf::Vector2f(50.f, 50.f), 100);
-
-    // --- APLIKACJA TRYBU BOGA (Jeœli zalogowano jako Admin) ---
     player->setGodMode(isAdminMode);
-    // ---------------------------------------------------------
 
     loadLevel("../levels/level_01.json");
 }
@@ -82,11 +83,7 @@ void GameScreen::loadLevel(const std::string& path) {
     background->set(levelData.background);
     player->setPosition(levelData.playerStart);
 
-    // Reset koloru (chyba ¿e jest adminem, wtedy PlayerBase::setGodMode powinno trzymaæ z³oty,
-    // ale tutaj dla pewnoœci mo¿na zostawiæ lub usun¹æ, zale¿nie jak setGodMode jest zaimplementowane.
-    // Jeœli setGodMode ustawi³o kolor, to ta linijka go nadpisze na bia³y.
-    // Bezpieczniej jest ustawiæ kolor na podstawie trybu:
-    if (isAdminMode) player->setColor(sf::Color(255, 215, 0)); // Z³oty
+    if (isAdminMode) player->setColor(sf::Color(255, 215, 0));
     else player->setColor(sf::Color::White);
 
     for (const auto& obs : levelData.obstacles) {
@@ -118,8 +115,20 @@ void GameScreen::handleEvents(sf::RenderWindow& window) {
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) window.close();
         else if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Escape) isPaused = !isPaused;
-            else if (event.key.code == sf::Keyboard::Enter && isPaused) isPaused = false;
+            if (event.key.code == sf::Keyboard::Escape) {
+                isPaused = !isPaused;
+            }
+            else if (isPaused) {
+                // Obs³uga klawiszy w trakcie pauzy
+                if (event.key.code == sf::Keyboard::Enter) {
+                    isPaused = false; // Wznowienie
+                }
+                else if (event.key.code == sf::Keyboard::Space) {
+                    // ZMIANA: Wyjœcie do menu
+                    nextScreenID = "menu"; // Ustawiamy cel
+                    finished = true;       // Koñczymy ten ekran
+                }
+            }
         }
     }
 }
@@ -139,7 +148,6 @@ void GameScreen::update(float delta) {
     if (player->isShooting() && player->canShoot()) {
         sf::Vector2f dir = player->getShootDirection();
 
-        // --- OBLICZANIE KRYTYKA ---
         const auto& stats = player->getStats();
         static std::random_device rd;
         static std::mt19937 gen(rd());
@@ -150,7 +158,6 @@ void GameScreen::update(float delta) {
         if (isCrit) {
             finalDmg = static_cast<int>(stats.attack * stats.critDamage);
         }
-        // --------------------------
 
         projectileManager.spawn(std::make_unique<Projectile>(
             player->getPosition() + sf::Vector2f(20, 20),
@@ -183,20 +190,11 @@ void GameScreen::update(float delta) {
         }
 
         if (player->getGlobalBounds().intersects(enemy->getGlobalBounds())) {
-            // Reagujemy tylko, jeœli gracz NIE jest nietykalny
-            // (Admin ma w³¹czony godMode, który w PlayerBase zapobiega otrzymywaniu obra¿eñ,
-            // ale isInvincible odnosi siê do tymczasowej nietykalnoœci po uderzeniu.
-            // Dla pewnoœci sprawdzamy isInvincible() - wewn¹trz takeDamage() jest sprawdzenie godMode).
             if (!player->isInvincible()) {
                 int dmg = enemy->getAttack();
-
-                // Zapamiêtaj HP przed uderzeniem
                 int hpBefore = player->getHP();
-
                 player->takeDamage(dmg);
 
-                // Jeœli HP spad³o (czyli nie jest Adminem), poka¿ tekst i odrzuæ
-                // (Admin ma godMode w takeDamage, wiêc HP nie spadnie)
                 if (player->getHP() < hpBefore) {
                     textManager->addText(std::to_string(dmg), player->getPosition(), sf::Color::Red);
 
@@ -242,4 +240,11 @@ void GameScreen::render(sf::RenderWindow& window) {
 }
 
 bool GameScreen::isFinished() const { return finished; }
-std::string GameScreen::getNextScreen() const { return isWin ? "gameover_win" : "gameover_lose"; }
+
+// ZMIANA: Zwraca rêcznie ustawiony ekran (menu) lub standardowy (win/lose)
+std::string GameScreen::getNextScreen() const {
+    if (!nextScreenID.empty()) {
+        return nextScreenID;
+    }
+    return isWin ? "gameover_win" : "gameover_lose";
+}
