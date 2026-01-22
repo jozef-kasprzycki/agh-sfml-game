@@ -1,12 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Obstacle.hpp"
+#include <string>
 #include <vector>
-#include <iostream>
-
-// Struktura zawierające wszystkie informacje nt
-// każdego poziomu, do kórej ładowane są dane z pliku
-// w LevelLoader 
 
 struct ObstacleData {
     sf::FloatRect bounds;
@@ -16,10 +11,12 @@ struct ObstacleData {
 struct EnemyData {
     sf::FloatRect bounds;
     std::string type;
-    // Jeszcze jakieś pola w przyszłości:
-    // float max_hp;
-    // float givenDamage;
-    // float damageRate;
+};
+
+// Nowa struktura dla drzwi
+struct DoorData {
+    sf::FloatRect bounds;
+    std::string next_level_path;
 };
 
 struct LevelData {
@@ -30,4 +27,5 @@ struct LevelData {
     std::vector<struct ObstacleData> obstacles;
     std::vector<struct EnemyData> enemies;
     std::string next_level_filename;
+    std::vector<DoorData> doors; // Lista drzwi
 };

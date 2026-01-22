@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <vector>
 
 class GameObj {
 private:
@@ -9,11 +10,11 @@ private:
     int framesNum;
     std::vector<sf::IntRect> frames;
     std::size_t currentFrame = 0;
-    float frameDuration = 0.12f; // czas na klatkę (s)
+    float frameDuration = 0.12f;
     float frameElapsed = 0.f;
 
 protected:
-    void setTexture(sf::Texture &texture);
+    void setTexture(sf::Texture& texture);
     void setScale(const sf::Vector2f& targetSize);
     void animate(int);
 
@@ -29,6 +30,9 @@ public:
 
     void setPosition(sf::Vector2f pos);
     void setTextureRect(sf::IntRect rect);
+
+    // NOWE: Pozwala zmieniać kolor/przeźroczystość sprite'a
+    void setColor(const sf::Color& color);
 
     void draw(sf::RenderWindow& window);
 };
