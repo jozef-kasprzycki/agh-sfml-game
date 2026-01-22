@@ -10,7 +10,7 @@
 #include "Backgorund.hpp"
 #include "ProjectileManager.hpp"
 #include "Door.hpp"
-#include "TextManager.hpp" // NOWE
+#include "TextManager.hpp" 
 
 #include <vector>
 #include <memory>
@@ -29,23 +29,24 @@ private:
 
     ProjectileManager projectileManager;
 
-    // NOWE
-    // TextManager musi byæ zainicjalizowany PO za³adowaniu czcionki,
-    // wiêc wskaŸnik lub std::optional, albo po prostu inicjalizacja w ciele konstruktora
-    // U¿yjmy unique_ptr dla bezpieczeñstwa kolejnoœci inicjalizacji
     std::unique_ptr<TextManager> textManager;
 
     struct LevelData levelData;
 
     bool finished = false;
     bool isWin = false;
-    bool isPaused = false;
 
+    // Zmienne pauzy
+    bool isPaused = false;
     sf::Font font;
     sf::Text pauseText;
     sf::RectangleShape pauseOverlay;
 
+    // NOWE: Zmienna przechowuj¹ca ID nastêpnego ekranu (jeœli jest pusta, u¿ywamy logiki win/lose)
+    std::string nextScreenID;
+
     std::string pendingLevelLoad;
+    static bool isAdminMode;
 
     sf::Vector2f getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size);
     int getRandomObstacleCount();
@@ -53,12 +54,8 @@ private:
 
     void loadLevel(const std::string& path);
 
-    static bool isAdminMode;
-
 public:
     GameScreen();
-
-    // Metoda statyczna do ustawiania trybu (wo³ana z AuthScreen)
     static void setAdminMode(bool admin);
 
     void handleEvents(sf::RenderWindow& window) override;
