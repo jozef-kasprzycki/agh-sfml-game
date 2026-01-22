@@ -5,7 +5,11 @@
 AuthScreen::AuthScreen()
 // ZMIANA: Œcie¿ka wychodzi dwa poziomy wy¿ej (z build/Debug/ do g³ównego folderu projektu)
 // Dziêki temu plik users.json nie zostanie usuniêty przy czyszczeniu projektu (Rebuild/Clean).
-    : userManager("../../data/users.json"), //na linuxie: userManager("../data/users.json"),
+    #if defined(__linux__)
+        : userManager("../data/users.json"), // Na linuxie wychodzi tylko jeden folder wyżej 
+    #else
+        : userManager("../../data/users.json"), // Na windowsie dwa foldery
+    #endif
     currentState(AuthState::Menu)
 {
     // Zak³adamy, ¿e font jest w assets (œcie¿ka relatywna do pliku exe w build/Debug)
