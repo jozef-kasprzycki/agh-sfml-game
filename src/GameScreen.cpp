@@ -5,7 +5,7 @@
 #include "EnemyGunner.hpp" 
 #include "EnemyBoss.hpp" 
 
-// Helpery... (bez zmian)
+// Helpery
 sf::Vector2f GameScreen::getRandomPositionNoCollisionObstacle(const sf::FloatRect& forbidden, const sf::Vector2f& size) {
     static std::random_device rd; static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distX(0.f, 1000.f - size.x);
@@ -63,8 +63,8 @@ void GameScreen::loadLevel(const std::string& path) {
     background->set(levelData.background);
     player->setPosition(levelData.playerStart);
 
-    // Resetujemy stan gracza po wejœciu na nowy poziom (opcjonalne)
-    // player->setColor(sf::Color::White); 
+    // Opcjonalnie: reset koloru przy zmianie poziomu
+    player->setColor(sf::Color::White);
 
     for (const auto& obs : levelData.obstacles) {
         obstacles.emplace_back(obs.bounds.getPosition(), obs.bounds.getSize(), obs.texture_path);
@@ -133,7 +133,6 @@ void GameScreen::update(float delta) {
     }
 
     for (auto& enemy : enemies_chasers) {
-        // Logika wroga
         enemy->behave(delta, player->getPosition());
         sf::Vector2f ed = enemy->getSpeedVector() * delta;
         collisionManager.tryMove(*enemy, ed);
@@ -144,20 +143,28 @@ void GameScreen::update(float delta) {
             projectileManager.spawn(std::move(bullet));
         }
 
-        // --- KOLIZJA GRACZ -> ENEMY (NOWE) ---
+        // --- KOLIZJA GRACZ -> ENEMY (POPRAWIONA) ---
         // Sprawdzamy czy gracz wpad³ na wroga
         if (player->getGlobalBounds().intersects(enemy->getGlobalBounds())) {
-            // Obra¿enia równe atakowi wroga (domyœlnie 10)
-            player->takeDamage(enemy->getAttack());
 
-            // Opcjonalnie: odrzut gracza (knockback) - prosty
-            sf::Vector2f recoil = player->getPosition() - enemy->getPosition();
-            // Normalizacja
-            float len = std::sqrt(recoil.x * recoil.x + recoil.y * recoil.y);
-            if (len > 0) recoil /= len;
-            player->move(recoil * 10.f); // Ma³y odskok, ¿eby nie staæ w modelu
+            // Reagujemy tylko, jeœli gracz NIE jest nietykalny
+            if (!player->isInvincible()) {
+
+                // 1. Zadaj obra¿enia
+                player->takeDamage(enemy->getAttack());
+
+                // 2. Odrzut (Knockback)
+                sf::Vector2f recoil = player->getPosition() - enemy->getPosition();
+                float len = std::sqrt(recoil.x * recoil.x + recoil.y * recoil.y);
+                if (len > 0) recoil /= len;
+
+                // Zamiast player->move(), u¿ywamy collisionManager!
+                // Dziêki temu odrzut nie wyrzuci nas za œcianê.
+                sf::Vector2f recoilMove = recoil * 20.f;
+                collisionManager.tryMove(*player, recoilMove);
+            }
         }
-        // -------------------------------------
+        // -------------------------------------------
     }
 
     projectileManager.update(delta, enemies_chasers, *player, obstacles);
