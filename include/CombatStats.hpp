@@ -5,8 +5,14 @@ struct CombatStats {
     int hp = 100;
     int attack = 10;
 
+    // Nowe statystyki
+    float fireRate = 0.5f;         // Czas odnowienia (s)
+    float projectileSpeed = 600.f; // Prêdkoœæ pocisku (px/s)
+
     CombatStats() = default;
 
-    // Konstruktor (hp, attack)
-    CombatStats(int h, int a) : max_hp(h), hp(h), attack(a) {}
+    // Konstruktor
+    CombatStats(int h, int a, float fr, float ps)
+        : max_hp(h), hp(h), attack(a), fireRate(fr), projectileSpeed(ps) {
+    }
 };

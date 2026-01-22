@@ -10,23 +10,15 @@ Entity::Entity(
 {
 }
 
-void Entity::update(float delta) {
-    // PUSTE! Nie wywo³ujemy tu updateMovement(delta), 
-    // poniewa¿ ruch obs³uguje CollisionManager w GameScreen.
-}
-
 int Entity::getHP() const {
     return combatStats.hp;
 }
 
-int Entity::getAttack() const {
-    return combatStats.attack;
-}
-
-bool Entity::isAlive() const {
-    return combatStats.hp > 0;
-}
-
 void Entity::takeDamage(int dmg) {
     combatStats.hp -= dmg;
+    if (combatStats.hp < 0) combatStats.hp = 0;
+}
+
+const CombatStats& Entity::getStats() const {
+    return combatStats;
 }

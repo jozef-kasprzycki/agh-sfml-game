@@ -9,6 +9,6 @@ public:
     PlayerBasic(
         sf::Vector2f position,
         sf::Vector2f size,
-        int hp // Dodano hp, aby pasowa³o do .cpp
+        int hp
     );
 };
