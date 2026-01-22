@@ -5,41 +5,50 @@ void ProjectileManager::spawn(std::unique_ptr<Projectile> p) {
     projectiles.push_back(std::move(p));
 }
 
+// TUTAJ BY£ B£¥D: Musi byæ 4. argument (obstacles), tak jak w pliku .hpp
 void ProjectileManager::update(
     float delta,
     std::vector<std::unique_ptr<EnemyBase>>& enemies,
-    PlayerBase& player
+    PlayerBase& player,
+    const std::vector<Obstacle>& obstacles
 ) {
     for (auto& p : projectiles) {
         p->update(delta);
+        bool hit = false;
 
-        // Kolizja: Pocisk Gracza -> Przeciwnik
+        // 1. Kolizja: Pocisk Gracza -> Przeciwnik
         if (p->getOwner() == ProjectileOwner::Player) {
             for (auto& enemy : enemies) {
                 if (enemy->getGlobalBounds().intersects(p->getGlobalBounds())) {
                     enemy->takeDamage(p->getDamage());
-                    p->setPosition({ -1000.f, -1000.f }); // Wyrzuæ poza mapê (oznaczenie do usuniêcia)
+                    hit = true;
+                    break;
                 }
             }
         }
-        // Kolizja: Pocisk Przeciwnika -> Gracz (opcjonalnie na przysz³oœæ)
-        /*
-        else if (p->getOwner() == ProjectileOwner::Enemy) {
-             if (player.getGlobalBounds().intersects(p->getGlobalBounds())) {
-                 player.takeDamage(p->getDamage());
-                 p->setPosition({ -1000.f, -1000.f });
-             }
+
+        // 2. Kolizja: Pocisk -> Przeszkoda (Œciana)
+        if (!hit) {
+            for (const auto& obs : obstacles) {
+                if (p->getGlobalBounds().intersects(obs.getGlobalBounds())) {
+                    hit = true;
+                    break;
+                }
+            }
         }
-        */
+
+        // Jeœli trafi³, wyrzuæ poza mapê
+        if (hit) {
+            p->setPosition({ -1000.f, -1000.f });
+        }
     }
 
-    // Usuwanie zu¿ytych pocisków (czas min¹³ LUB wylecia³y poza mapê po trafieniu)
+    // Usuwanie zu¿ytych pocisków
     projectiles.erase(
         std::remove_if(
             projectiles.begin(),
             projectiles.end(),
             [](const std::unique_ptr<Projectile>& p) {
-                // Usuñ jeœli czas min¹³ lub jest bardzo daleko (poza ekranem po trafieniu)
                 return p->isExpired() || p->getPosition().x < -900.f;
             }
         ),
